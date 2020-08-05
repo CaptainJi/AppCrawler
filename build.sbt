@@ -3,9 +3,9 @@ version := "2.1.2"
 scalaVersion := "2.12.3"
 
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-  "org.scala-lang" % "scala-library" % scalaVersion.value,
-  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+//  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+//  "org.scala-lang" % "scala-library" % scalaVersion.value,
+//  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   "io.appium" % "java-client" % "5.0.4",
   "org.seleniumhq.selenium" % "selenium-java" % "3.6.0" % "test",
   //"io.selendroid" % "selendroid" % "0.16.0",
@@ -35,7 +35,6 @@ libraryDependencies ++= Seq(
   "com.github.tototoshi" %% "scala-csv" % "1.3.4",
   "us.codecraft" % "xsoup" % "0.3.1",
   "junit" % "junit" % "4.12" % "test",
-  "org.scala-debugger" %% "scala-debugger-api" % "1.1.0-M3",
   "org.pegdown" % "pegdown" % "1.6.0" //html report
 )
 
@@ -75,7 +74,8 @@ assemblyMergeStrategy in assembly := {
     MergeStrategy.first
   }
 }
-
+resolvers += "spring" at "https://repo.spring.io/libs-release/"
+resolvers += Resolver.jcenterRepo
 
 parallelExecution in Test := false
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-o", "-u", "target/test-reports", "-h", "target/test-reports")
