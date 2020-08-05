@@ -2,12 +2,11 @@ package com.testerhome.appcrawler.plugin
 
 import com.sun.jdi.event._
 import com.sun.jdi.request.{EventRequest, EventRequestManager}
-import com.sun.jdi.{Bootstrap, ReferenceType, VirtualMachine}
+import com.sun.jdi.{Bootstrap, VirtualMachine}
 import com.sun.tools.jdi.SocketAttachingConnector
 import com.testerhome.appcrawler.CommonLog
-import com.testerhome.appcrawler.CommonLog
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 /**
   * Created by seveniruby on 16/4/24.
@@ -55,9 +54,9 @@ class AndroidTrace extends CommonLog {
             log.info(e.thread().status())
             val frame = e.thread().frame(0)
             log.info("frames")
-            log.info(e.thread().frames().map(f=>s"${f.location().declaringType().name()}:${f.location().lineNumber()}:${f.location().method().name()}").mkString("\n"))
-              log.info("arguments")
-              frame.getArgumentValues.foreach(av=>log.info(av))
+            log.info(e.thread().frames().map(f => s"${f.location().declaringType().name()}:${f.location().lineNumber()}:${f.location().method().name()}").mkString("\n"))
+            log.info("arguments")
+            frame.getArgumentValues.foreach(av => log.info(av))
             log.info("value")
             frame.visibleVariables().foreach(v => log.info(s"${v}=${frame.getValue(v)}"))
           }
@@ -104,7 +103,7 @@ class AndroidTrace extends CommonLog {
         methodEntry.enable()
     */
 
-    val breakpoints=List(
+    val breakpoints = List(
       "com.google.gson.JsonObject:get",
       "com.google.gson.JsonObject:getAs.*",
       "com.google.gson.JsonObject:get.*",
@@ -114,13 +113,13 @@ class AndroidTrace extends CommonLog {
       ".*TextView.*:onClick",
       "android.*:onClick"
     )
-    val blackList=List("getAsJsonPrimitive", ".*Class.*", "getAsJsonObject")
-    breakpoints.foreach(b=>{
-      val classMatcher=b.split(":").head
-      val methodMatcher=b.split(":").last
+    val blackList = List("getAsJsonPrimitive", ".*Class.*", "getAsJsonObject")
+    breakpoints.foreach(b => {
+      val classMatcher = b.split(":").head
+      val methodMatcher = b.split(":").last
       log.info(s"${classMatcher} ${methodMatcher}")
       vm.allClasses().filter(_.name().matches(classMatcher))
-        .flatMap(_.allMethods()).filter(m=>m.name().matches(methodMatcher) && blackList.map(m.name().matches(_)).contains(true)==false)
+        .flatMap(_.allMethods()).filter(m => m.name().matches(methodMatcher) && blackList.map(m.name().matches(_)).contains(true) == false)
         .flatMap(_.allLineLocations())
         .distinct.foreach(location => {
         log.info(s"set break on ${location.method().name()} ${location}")

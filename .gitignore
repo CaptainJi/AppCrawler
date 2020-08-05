@@ -6,3 +6,6 @@ conf.json
 xueqiu.json
 *.apk
 *.swp
+.DS_Store
+.java-version
+lib/tools.jar
