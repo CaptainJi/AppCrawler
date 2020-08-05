@@ -21,26 +21,32 @@
 
 ## 从源代码编译
 
-### 给 sbt 设置国内源
-***大坑***
-***大坑***
-***大坑***
-> 代码中调用了 `com.sun.jdi`，需要复制 `tools.jar` 到 lib 目录
+#### 给 sbt 设置国内源
+   ***大坑***
+   ***大坑***
+   ***大坑***
+    
+   > 代码中调用了 `com.sun.jdi`，需要复制 `tools.jar` 到 lib 目录
 
-新建文件 `~/.sbt/repositories` 并添加一下内容
+#### 新建文件 `~/.sbt/repositories` 并添加一下内容
 
-```
-[repositories]
-local
-huaweicloud-maven: https://repo.huaweicloud.com/repository/maven
-maven-central: https://repo1.maven.org/maven2/
-#maven-central-ivy: https://repo1.maven.org/maven2, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
-sbt-plugin-repo: https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
-```
+   ```
+    [repositories]
+    local
+    huaweicloud-maven: https://repo.huaweicloud.com/repository/maven
+    maven-central: https://repo1.maven.org/maven2/
+    #maven-central-ivy: https://repo1.maven.org/maven2, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+    sbt-plugin-repo: https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+   ```
 
-### 运行命令 `sbt -Dsbt.override.build.repos=true -v assembly`
+#### 运行命令 
 
-### `target` 目录下寻找生成的 jar 包
+   ```
+    sbt -Dsbt.override.build.repos=true -v assembly
+   ```
+
+#### `target` 目录下寻找生成的 jar 包
+
 
 ## 安装依赖
 
