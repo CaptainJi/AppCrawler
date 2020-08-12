@@ -23,6 +23,7 @@ jobs:
         run: |
           cp $JAVA_HOME/lib/tools.jar lib
           sbt assembly
+          ls target
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

@@ -1,5 +1,5 @@
 val versionName =  sys.env.getOrElse("VERSION", "1.0.0")
-name := "appCrawler2"
+name := "appcrawler2"
 version := versionName
 scalaVersion := "2.12.3"
 
