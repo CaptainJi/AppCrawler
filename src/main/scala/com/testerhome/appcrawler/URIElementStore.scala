@@ -18,7 +18,7 @@ class URIElementStore {
   def setElementSkip(element: URIElement): Unit = {
     //todo: 待改进
     //clickedElementsList.remove(clickedElementsList.size - 1)
-    if(elementStore.contains(element.toString)==false){
+    if(!elementStore.contains(element.toString)){
       elementStore(element.toString)=ElementInfo()
       elementStore(element.toString).element=element
     }
@@ -26,7 +26,7 @@ class URIElementStore {
   }
 
   def setElementClicked(element: URIElement): Unit = {
-    if(elementStore.contains(element.toString)==false){
+    if(!elementStore.contains(element.toString)){
       elementStore(element.toString)=ElementInfo()
       elementStore(element.toString).element=element
     }
@@ -36,11 +36,11 @@ class URIElementStore {
   }
 
   def saveElement(element: URIElement): Unit = {
-    if(elementStore.contains(element.toString)==false){
+    if(!elementStore.contains(element.toString)){
       elementStore(element.toString)=ElementInfo()
       elementStore(element.toString).element=element
     }
-    if (elementStore.contains(element.toString) == false) {
+    if (!elementStore.contains(element.toString)) {
       elementStore(element.toString).action=ElementStatus.Clicked
       AppCrawler.log.info(s"first found ${element}")
     }

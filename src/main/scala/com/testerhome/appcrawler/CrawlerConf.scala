@@ -95,15 +95,17 @@ class CrawlerConf {
   //todo: 用watch代替triggerActions
   var autoCrawl: Boolean=true
   var asserts = ListBuffer[Map[String, Any]]()
-  var testcase=TestCase(
-    name="TesterHome AppCrawler",
-    steps = List(
-      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
-      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
-      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
-      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null)
-    )
-  )
+//  var testcase=TestCase(
+//    name="TesterHome AppCrawler",
+//    steps = List(
+//      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
+//      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
+//      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
+//      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null)
+//    )
+//  )
+
+  var testcase = TestCase()
 
   var beforeElementAction = ListBuffer[Map[String, String]]()
   var afterElementAction = ListBuffer[String]()
