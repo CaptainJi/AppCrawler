@@ -1,13 +1,14 @@
-name := "AppCrawler"
-version := "2.1.2"
+val versionName =  sys.env.getOrElse("VERSION", "1.0.0")
+name := "appCrawler2"
+version := versionName
 scalaVersion := "2.12.3"
 
 libraryDependencies ++= Seq(
-//  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-//  "org.scala-lang" % "scala-library" % scalaVersion.value,
-//  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  //  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+  //  "org.scala-lang" % "scala-library" % scalaVersion.value,
+  //  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   "io.appium" % "java-client" % "7.3.0",
-//  "org.seleniumhq.selenium" % "selenium-java" % "3.6.0" % "test",
+  //  "org.seleniumhq.selenium" % "selenium-java" % "3.6.0" % "test",
   //"io.selendroid" % "selendroid" % "0.16.0",
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.7",
   "com.github.scopt" %% "scopt" % "3.5.0",
@@ -52,7 +53,7 @@ ProguardKeys.mergeStrategies in Proguard += ProguardMerge.first(".*".r)
 ProguardKeys.mergeStrategies in Proguard += ProguardMerge.discard("META-INF/.*".r)
 */
 
-assemblyJarName in assembly := "appcrawler-" + version.value + ".jar"
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"
 test in assembly := {}
 target in assembly := file("target")
 mainClass in assembly := Some("com.testerhome.appcrawler.AppCrawler")
@@ -69,8 +70,7 @@ assemblyMergeStrategy in assembly := {
   }
   case x if x.matches("com.testerhome.plugin.OCR.class") => MergeStrategy.discard
   case x if x.matches("com.testerhome.appcrawler.plugin.AndroidTrace.class") => MergeStrategy.discard
-  case x => {
-    //println(x)
+  case _ => {
     MergeStrategy.first
   }
 }
