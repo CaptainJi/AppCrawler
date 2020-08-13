@@ -1,26 +1,21 @@
 package com.testerhome.appcrawler
 
 import java.io.File
-import java.lang.reflect.Field
 import java.nio.charset.Charset
 
-import com.testerhome.appcrawler.plugin.FlowDiff
 import org.apache.log4j.Level
-import org.scalatest.ConfigMap
-
-import scala.io.Source
 
 /**
   * Created by seveniruby on 16/4/24.
   */
 object AppCrawler extends CommonLog {
-  val banner=
+  val banner =
     """
       |----------------
-      |AppCrawler 2.1.2 [霍格沃兹测试学院特别纪念版]
-      |Appium Version 1.7.1 support
+      |AppCrawler2 1.0.0
+      |Appium Version 1.18 support
       |app爬虫, 用于自动遍历测试. 支持Android和iOS, 支持真机和模拟器
-      |帮助文档: https://github.com/seveniruby/AppCrawler
+      |帮助文档: https://github.com/trevorwang/AppCrawler
       |移动测试技术交流: https://testerhome.com
       |感谢: 晓光 泉龙 杨榕 恒温 mikezhou yaming116 沐木
       |感谢如下公司提供商业支持: Keep
@@ -32,6 +27,7 @@ object AppCrawler extends CommonLog {
   var logPath = ""
   var crawler = new Crawler
   val startTime = new java.text.SimpleDateFormat("YYYYMMddHHmmss").format(new java.util.Date().getTime)
+
   case class Param(
                     app: String = "",
                     conf: File = new File(""),
@@ -47,7 +43,7 @@ object AppCrawler extends CommonLog {
                     master: String = "",
                     diff: Boolean = false,
                     template: String = "",
-                    demo:Boolean=false,
+                    demo: Boolean = false,
                     capability: Map[String, String] = Map[String, String]()
                   )
 
@@ -73,7 +69,7 @@ object AppCrawler extends CommonLog {
     log.debug("Default Charset=" + Charset.defaultCharset())
     log.debug("file.encoding=" + System.getProperty("file.encoding"))
     log.debug("Default Charset=" + Charset.defaultCharset())
-    log.debug("project directory=" + (new java.io.File(getClass.getProtectionDomain.getCodeSource.getLocation.getPath)).getParentFile.getParentFile)
+    log.debug("project directory=" + new java.io.File(getClass.getProtectionDomain.getCodeSource.getLocation.getPath).getParentFile.getParentFile)
 
   }
 
@@ -87,12 +83,12 @@ object AppCrawler extends CommonLog {
       args
     }
 
-    val parser=createParser()
+    val parser = createParser()
     parseParams(parser, args_new)
     sys.exit()
   }
 
-  def createParser(): scopt.OptionParser[Param] ={
+  def createParser(): scopt.OptionParser[Param] = {
     val parser = new scopt.OptionParser[Param]("appcrawler") {
       head(banner)
       opt[String]('a', "app") action { (x, c) => {
@@ -178,7 +174,7 @@ object AppCrawler extends CommonLog {
     parser
   }
 
-  def parseParams(parser: scopt.OptionParser[Param], args_new:Array[String]): Unit ={
+  def parseParams(parser: scopt.OptionParser[Param], args_new: Array[String]): Unit = {
     parser.parse(args_new, Param()) match {
       case Some(config) => {
         if (config.verbose) {
@@ -229,7 +225,7 @@ object AppCrawler extends CommonLog {
         crawlerConf.capability ++= config.capability
 
         //设定app
-        crawlerConf.capability ++=Map("app"-> parsePath(config.app).getOrElse(""))
+        crawlerConf.capability ++= Map("app" -> parsePath(config.app).getOrElse(""))
         log.info(s"app path = ${crawlerConf.capability("app")}")
 
         //设定appium的端口
@@ -271,11 +267,11 @@ object AppCrawler extends CommonLog {
         log.trace(DataObject.toYaml(crawlerConf))
 
         //todo: 用switch替代
-        if (config.report != "" && config.candidate.isEmpty && config.template=="") {
+        if (config.report != "" && config.candidate.isEmpty && config.template == "") {
           val store = Report.loadResult(s"${config.report}/elements.yml")
           Report.saveTestCase(store, config.report)
-          Report.store=store
-          crawler.conf=crawlerConf
+          Report.store = store
+          crawler.conf = crawlerConf
           Report.runTestCase()
           return
         } else if (config.candidate.nonEmpty) {
@@ -283,26 +279,26 @@ object AppCrawler extends CommonLog {
           Report.master = config.master
           Report.reportDir = config.report
           Report.reportPath = config.report
-          Report.testcaseDir = config.report+"/tmp/"
+          Report.testcaseDir = config.report + "/tmp/"
           DiffSuite.saveTestCase()
           Report.runTestCase()
           return
         }
 
-        if(config.template!=""){
-          val template=new Template
-          if(config.appium.nonEmpty){
+        if (config.template != "") {
+          val template = new Template
+          if (config.appium.nonEmpty) {
             template.getPageSource(config.appium)
-          }else {
+          } else {
             template.read(s"${crawlerConf.resultDir}/elements.yml")
           }
-          template.write(config.template, crawlerConf.resultDir+"/template/")
+          template.write(config.template, crawlerConf.resultDir + "/template/")
           return
         }
 
         //生成demo示例文件
-        if(config.demo){
-          val file=scala.reflect.io.File("example.yml")
+        if (config.demo) {
+          val file = scala.reflect.io.File("example.yml")
           file.writeAll(crawlerConf.toYaml())
           log.info(s"you can read ${file.jfile.getCanonicalPath} for demo example")
           return
@@ -315,8 +311,8 @@ object AppCrawler extends CommonLog {
     }
   }
 
-  def parsePath(app: String): Option[String] ={
-    val appFile=new File(app)
+  def parsePath(app: String): Option[String] = {
+    val appFile = new File(app)
     app match {
       case file if appFile.exists() => {
         //支持相对路径
@@ -337,6 +333,7 @@ object AppCrawler extends CommonLog {
       }
     }
   }
+
   def startCrawl(conf: CrawlerConf): Unit = {
     crawler = new Crawler
     crawler.loadConf(conf)

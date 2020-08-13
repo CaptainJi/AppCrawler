@@ -30,19 +30,19 @@ class LogPlugin extends Plugin {
         }
       })
     }
-    if(getCrawler().getElementAction()!="skip") {
+    if (getCrawler().getElementAction() != "skip") {
       logs.foreach(log => {
         saveLog(log)
       })
     }
   }
 
-  def saveLog(logName:String): Unit ={
+  def saveLog(logName: String): Unit = {
     log.info(s"read log=${logName.toString}")
     val logMessage = driver.manage().logs.get(logName.toString).filter(Level.ALL).toArray()
     log.info(s"log=${logName} size=${logMessage.size}")
-    if (logMessage.size > 0) {
-      val fileName = getCrawler().getBasePathName()+".log"
+    if (logMessage.nonEmpty) {
+      val fileName = getCrawler().getBasePathName() + ".log"
       log.info(s"save ${logName} to $fileName")
       File(fileName).writeAll(logMessage.mkString("\n"))
       log.info(s"save ${logName} end")
@@ -53,7 +53,8 @@ class LogPlugin extends Plugin {
   override def afterUrlRefresh(url: String): Unit = {
 
   }
-  override def stop(): Unit ={
+
+  override def stop(): Unit = {
     logs.foreach(log => {
       saveLog(log)
     })

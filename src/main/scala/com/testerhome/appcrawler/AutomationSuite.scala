@@ -24,10 +24,10 @@ class AutomationSuite extends FunSuite with Matchers with BeforeAndAfterAllConfi
     conf.testcase.steps.foreach(step => {
 
 
-      if(step.xpath!=null && step.action!=null){
-        step.when=When(step.xpath, step.action)
+      if (step.xpath != null && step.action != null) {
+        step.when = When(step.xpath, step.action)
       }
-      if(step.when!=null) {
+      if (step.when != null) {
         val when = step.when
         val xpath = when.xpath
         val action = when.action
@@ -47,7 +47,7 @@ class AutomationSuite extends FunSuite with Matchers with BeforeAndAfterAllConfi
       }
 
 
-      if(step.then!=null) {
+      if (step.then != null) {
         step.then.foreach(existAssert => {
           log.debug(existAssert)
           cp {

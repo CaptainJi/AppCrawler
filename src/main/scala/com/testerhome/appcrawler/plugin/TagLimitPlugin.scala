@@ -1,7 +1,6 @@
 package com.testerhome.appcrawler.plugin
 
-import com.testerhome.appcrawler.URIElement
-import com.testerhome.appcrawler.{ElementStatus, Plugin}
+import com.testerhome.appcrawler.{Plugin, URIElement}
 
 /**
   * Created by seveniruby on 16/1/21.
@@ -21,18 +20,18 @@ class TagLimitPlugin extends Plugin {
     log.trace(s"tag path = ${key}")
     if (!tagLimit.contains(key)) {
       //跳过具备selected=true的菜单栏
-      getCrawler().driver.getListFromXPath("//*[@selected='true']").foreach(m=>{
-        val element=getCrawler().getUrlElementByMap(m)
-        tagLimit(element.toTagPath())=20
+      getCrawler().driver.getListFromXPath("//*[@selected='true']").foreach(m => {
+        val element = getCrawler().getUrlElementByMap(m)
+        tagLimit(element.toTagPath()) = 20
         log.info(s"tagLimit[${element.toTagPath()}]=20")
       })
       //应用定制化的规则
       getCrawler().getTagLimitFromElementActions(element) match {
-        case Some(v)=> {
-          tagLimit(key)=v
+        case Some(v) => {
+          tagLimit(key) = v
           log.info(s"tagLimit[${key}]=${tagLimit(key)} with conf.tagLimit")
         }
-        case None => tagLimit(key)=tagLimitMax
+        case None => tagLimit(key) = tagLimitMax
       }
     }
 

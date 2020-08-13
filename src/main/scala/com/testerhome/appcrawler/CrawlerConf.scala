@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
@@ -93,17 +92,17 @@ class CrawlerConf {
   /** 引导规则. name, value, times三个元素组成 */
   var triggerActions = ListBuffer[scala.collection.mutable.Map[String, Any]]()
   //todo: 用watch代替triggerActions
-  var autoCrawl: Boolean=true
+  var autoCrawl: Boolean = true
   var asserts = ListBuffer[Map[String, Any]]()
-//  var testcase=TestCase(
-//    name="TesterHome AppCrawler",
-//    steps = List(
-//      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
-//      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
-//      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
-//      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null)
-//    )
-//  )
+  //  var testcase=TestCase(
+  //    name="TesterHome AppCrawler",
+  //    steps = List(
+  //      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
+  //      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
+  //      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null),
+  //      Step(given = null, when = null, xpath="//*", action = "driver.swipe(0.9, 0.5, 0.1, 0.5)", then=null)
+  //    )
+  //  )
 
   var testcase = TestCase()
 
@@ -195,6 +194,8 @@ class CrawlerConf {
 }
 
 
-case class TestCase(name:String="", steps:List[Step]=List[Step]())
-case class Step(given: List[String], var when: When, then:List[String], xpath:String, action:String)
-case class When(xpath:String, action:String)
+case class TestCase(name: String = "", steps: List[Step] = List[Step]())
+
+case class Step(given: List[String], var when: When, then: List[String], xpath: String, action: String)
+
+case class When(xpath: String, action: String)

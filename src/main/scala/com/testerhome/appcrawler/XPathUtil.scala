@@ -2,12 +2,10 @@ package com.testerhome.appcrawler
 
 import java.io.{ByteArrayInputStream, StringWriter}
 import java.nio.charset.StandardCharsets
+
+import com.sun.org.apache.xml.internal.serialize.{OutputFormat, XMLSerializer}
 import javax.xml.parsers.{DocumentBuilder, DocumentBuilderFactory}
 import javax.xml.xpath.{XPath, XPathConstants, XPathFactory}
-
-import com.sun.org.apache.xml.internal.serialize.{XMLSerializer, OutputFormat}
-
-//import org.apache.xml.serialize.{OutputFormat, XMLSerializer}
 import org.w3c.dom.{Attr, Document, Node, NodeList}
 
 import scala.collection.mutable
@@ -17,7 +15,7 @@ import scala.collection.mutable.ListBuffer
   * Created by seveniruby on 16/3/26.
   */
 object XPathUtil extends CommonLog {
-  var xpathExpr=List("name", "label", "value", "resource-id", "content-desc", "class", "text", "index")
+  var xpathExpr = List("name", "label", "value", "resource-id", "content-desc", "class", "text", "index")
 
   def toDocument(raw: String): Document = {
     val builderFactory: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
@@ -42,9 +40,10 @@ object XPathUtil extends CommonLog {
     out.toString
   }
 
-  def setXPathExpr(expr:List[String]): Unit ={
-    xpathExpr=expr
+  def setXPathExpr(expr: List[String]): Unit = {
+    xpathExpr = expr
   }
+
   /**
     * 从属性中获取xpath的唯一表达式
     *
@@ -70,8 +69,8 @@ object XPathUtil extends CommonLog {
       if (newAttribute.getOrElse("content-desc", "") == newAttribute.getOrElse("resource-id", "")) {
         newAttribute = newAttribute - "content-desc"
       }
-      if(newAttribute.getOrElse("resource-id", "").nonEmpty){
-        newAttribute=Map("resource-id"-> newAttribute.getOrElse("resource-id", "") )
+      if (newAttribute.getOrElse("resource-id", "").nonEmpty) {
+        newAttribute = Map("resource-id" -> newAttribute.getOrElse("resource-id", ""))
       }
 
 
@@ -82,9 +81,9 @@ object XPathUtil extends CommonLog {
         kv._1 match {
           case "tag" => ""
           //case "index" => ""
-          case "name" if kv._2.size>50 => ""
-            //todo: 优化长文本的展示
-          case "text" if newAttribute("tag").contains("Button")==false && kv._2.length>10 => ""
+          case "name" if kv._2.length > 50 => ""
+          //todo: 优化长文本的展示
+          case "text" if !newAttribute("tag").contains("Button") && kv._2.length > 10 => ""
           case key if xpathExpr.contains(key) && kv._2.nonEmpty => s"@${kv._1}=" + "\"" + kv._2.replace("\"", "\\\"") + "\""
           case _ => ""
         }
@@ -125,8 +124,9 @@ object XPathUtil extends CommonLog {
     return xpath
   }
 
-  def getAttributesFromNode(node: Node): ListBuffer[Map[String, String]] ={
+  def getAttributesFromNode(node: Node): ListBuffer[Map[String, String]] = {
     val path = ListBuffer[Map[String, String]]()
+
     //递归获取路径,生成可定位的xpath表达式
     def getParent(node: Node): Unit = {
       if (node.hasAttributes) {
@@ -144,6 +144,7 @@ object XPathUtil extends CommonLog {
         getParent(node.getParentNode)
       }
     }
+
     getParent(node)
     //返回一个从root到leaf的属性列表
     return path.reverse
@@ -174,7 +175,7 @@ object XPathUtil extends CommonLog {
           val node = nodeList.item(i)
           //如果node为.可能会异常. 不过目前不会
           nodeMap("tag") = node.getNodeName
-          val path=getAttributesFromNode(node)
+          val path = getAttributesFromNode(node)
           nodeMap("xpath") = getXPathFromAttributes(path)
           //支持导出单个字段
           nodeMap(node.getNodeName) = node.getNodeValue
@@ -206,16 +207,16 @@ object XPathUtil extends CommonLog {
             nodeMap("label") = nodeMap("content-desc")
           }
 
-          if (nodeMap("xpath").toString.nonEmpty && nodeMap("value").toString().size<50) {
+          if (nodeMap("xpath").toString.nonEmpty && nodeMap("value").toString.length < 50) {
             nodesMap += (nodeMap.toMap)
           } else {
             log.trace(s"xpath error skip ${nodeMap}")
           }
-        } )
+        })
       }
-      case attr:String => {
+      case attr: String => {
         //如果是提取xpath的属性值, 就返回一个简单的结构
-        nodesMap+=Map("attribute"->attr)
+        nodesMap += Map("attribute" -> attr)
       }
     }
     nodesMap.toList

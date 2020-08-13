@@ -3,8 +3,7 @@ package com.testerhome.appcrawler.driver
 import java.io.File
 import java.util.concurrent.{Callable, Executors, TimeUnit, TimeoutException}
 
-import com.testerhome.appcrawler.{CommonLog, URIElement}
-import com.testerhome.appcrawler.{CommonLog, XPathUtil, Runtimes}
+import com.testerhome.appcrawler.{CommonLog, Runtimes, URIElement, XPathUtil}
 import org.openqa.selenium.Rectangle
 import org.openqa.selenium.remote.DesiredCapabilities
 import org.w3c.dom.Document
@@ -22,8 +21,8 @@ trait WebDriver extends CommonLog {
   var screenWidth = 0
   var screenHeight = 0
   var currentPageDom: Document = null
-  var currentPageSource: String=""
-  val appiumExecResults=ListBuffer[String]()
+  var currentPageSource: String = ""
+  val appiumExecResults = ListBuffer[String]()
 
 
   def config(key: String, value: Any): Unit = {
@@ -37,26 +36,37 @@ trait WebDriver extends CommonLog {
 
   }
 
-  def findElementByUrlElement(element: URIElement): Boolean= {
+  def findElementByUrlElement(element: URIElement): Boolean = {
     false
   }
 
   def getDeviceInfo(): Unit = {
   }
 
-  def screenshot(): File = { null }
+  def screenshot(): File = {
+    null
+  }
 
   def back(): Unit = {}
 
   def backApp(): Unit = {}
-  def launchApp(): Unit ={
+
+  def launchApp(): Unit = {
 
   }
 
-  def getPageSource(): String = { "" }
+  def getPageSource(): String = {
+    ""
+  }
 
-  def tap(): this.type = { this }
-  def longTap(): this.type = { this }
+  def tap(): this.type = {
+    this
+  }
+
+  def longTap(): this.type = {
+    this
+  }
+
   def swipe(direction: String): Unit = {
     log.info(s"start swipe ${direction}")
     var startX = 0.0
@@ -104,8 +114,6 @@ trait WebDriver extends CommonLog {
   }
 
 
-
-
   def dsl(command: String): Unit = {
     log.info(s"eval ${command}")
     Try(Runtimes.eval(command)) match {
@@ -121,7 +129,7 @@ trait WebDriver extends CommonLog {
     ""
   }
 
-  def getAppName(): String ={
+  def getAppName(): String = {
     ""
   }
 
@@ -132,13 +140,13 @@ trait WebDriver extends CommonLog {
           callback
         }
       })
-      if(timeout<0){
+      if (timeout < 0) {
         task.get()
-      }else {
+      } else {
         task.get(timeout, TimeUnit.SECONDS)
       }
 
-    })  match {
+    }) match {
       case Success(v) => {
         appiumExecResults.append("success")
         Some(v)
@@ -179,12 +187,14 @@ trait WebDriver extends CommonLog {
 
 
   def event(keycode: Int): Unit = {}
-  def mark(fileName: String, newImageName:String,  x: Int, y: Int, w: Int, h: Int): Unit = {}
-  def getRect(): Rectangle ={
+
+  def mark(fileName: String, newImageName: String, x: Int, y: Int, w: Int, h: Int): Unit = {}
+
+  def getRect(): Rectangle = {
     new Rectangle(0, 0, 0, 0)
   }
 
-  def sendKeys(content:String): Unit ={
+  def sendKeys(content: String): Unit = {
 
   }
 
@@ -193,21 +203,21 @@ trait WebDriver extends CommonLog {
   }
 
   //todo: xpath 2.0 support
-  def getListFromXPath(key:String): List[Map[String, Any]] ={
+  def getListFromXPath(key: String): List[Map[String, Any]] = {
     key match {
       //xpath
       case xpath if Array('/', '(').contains(xpath.head) => {
         XPathUtil.getListFromXPath(xpath, currentPageDom)
       }
       case regex if key.contains(".*") || key.startsWith("^") => {
-        XPathUtil.getListFromXPath("//*", currentPageDom).filter(m=>{
+        XPathUtil.getListFromXPath("//*", currentPageDom).filter(m => {
           m("name").toString.matches(regex) ||
             m("label").toString.matches(regex) ||
             m("value").toString.matches(regex)
         })
       }
       case str: String => {
-        XPathUtil.getListFromXPath("//*", currentPageDom).filter(m=>{
+        XPathUtil.getListFromXPath("//*", currentPageDom).filter(m => {
           m("name").toString.contains(str) ||
             m("label").toString.contains(str) ||
             m("value").toString.contains(str)

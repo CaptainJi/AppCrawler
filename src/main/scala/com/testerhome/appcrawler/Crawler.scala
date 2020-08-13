@@ -11,7 +11,7 @@ import org.scalatest.ConfigMap
 import sun.misc.Signal
 
 import scala.annotation.tailrec
-import scala.collection.mutable.{ListBuffer, Map}
+import scala.collection.mutable.ListBuffer
 import scala.collection.{immutable, mutable}
 import scala.reflect.io.File
 import scala.util.{Failure, Success, Try}
@@ -180,7 +180,7 @@ class Crawler extends CommonLog {
           driver.appiumExecResults.takeRight(10).foreach(x => log.info(x))
 
           //todo: 需要继续过滤appium的报错
-          val failCount10 = driver.appiumExecResults.takeRight(10).filter(_ != "success").size
+          val failCount10 = driver.appiumExecResults.takeRight(10).count(_ != "success")
           log.info(s"failCount=${failCount10} retryCount=${retryCount}")
           if (failCount10 > 10 * 0.3 && retryCount < 10) {
             log.error("appium error, restart and continue to crawl ")
@@ -367,9 +367,9 @@ class Crawler extends CommonLog {
       log.warn(s"not in app white list ${conf.appWhiteList}")
       log.warn(s"jump to other app appName=${appNameRecord.last()} lastAppName=${appNameRecord.pre()}")
       setElementAction("backApp")
-      return true
+      true
     } else {
-      return false
+      false
     }
 
   }
@@ -389,7 +389,7 @@ class Crawler extends CommonLog {
       log.error(s"appNameRecord last 5 ${appNameRecord.last(5)}")
       return true
     }
-    return false
+    false
   }
 
   def needReturn(): Boolean = {
@@ -1129,7 +1129,7 @@ class Crawler extends CommonLog {
     stopAll = true
     if (signalInt < 2) {
       Try(pluginClasses.foreach(_.stop())) match {
-        case Success(v) => {}
+        case Success(_) => {}
         case Failure(e) => {
           log.error(e.getMessage)
           log.error(e.getCause)
@@ -1142,7 +1142,7 @@ class Crawler extends CommonLog {
 
   def handleCtrlC(): Unit = {
     log.info("add shutdown hook")
-    Signal.handle(new Signal("INT"), (sig: Signal) => {
+    Signal.handle(new Signal("INT"), (_: Signal) => {
       log.info("exit by INT")
       signalInt += 1
       stop()

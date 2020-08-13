@@ -2,11 +2,10 @@ package com.testerhome.appcrawler.driver
 
 import java.awt.{BasicStroke, Color}
 import java.io.File
-import javax.imageio.ImageIO
 
 import com.alibaba.fastjson.JSONObject
-import com.testerhome.appcrawler.{AppCrawler, CommonLog, DataObject, URIElement}
-import com.testerhome.appcrawler._
+import com.testerhome.appcrawler.{AppCrawler, CommonLog, DataObject, URIElement, _}
+import javax.imageio.ImageIO
 import macaca.client.MacacaClient
 import org.apache.log4j.Level
 import org.openqa.selenium.Rectangle
@@ -17,7 +16,7 @@ import scala.sys.process._
 /**
   * Created by seveniruby on 16/8/9.
   */
-class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
+class MacacaDriver extends CommonLog with WebBrowser with WebDriver {
   Runtimes.init()
   var conf: CrawlerConf = _
 
@@ -25,11 +24,11 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
   var appiumProcess: Process = null
   var loc = ""
   var index = 0
-  var currentElement: macaca.client.commands.Element =_
+  var currentElement: macaca.client.commands.Element = _
 
   private var platformName = ""
 
-  def this(url: String = "http://127.0.0.1:4723/wd/hub", configMap: Map[String, Any]=Map[String, Any]()) {
+  def this(url: String = "http://127.0.0.1:4723/wd/hub", configMap: Map[String, Any] = Map[String, Any]()) {
     this
     appium(url, configMap)
   }
@@ -40,7 +39,7 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
   }
 
 
-  def shell(command:String): Unit ={
+  def shell(command: String): Unit = {
     sys.props("os.name").toLowerCase match {
       case x if x contains "windows" => Seq("cmd", "/C") ++ command
       case _ => command
@@ -51,11 +50,15 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
   //todo: 集成appium进程管理
   def start(port: Int = 4723): Unit = {
     appiumProcess = Process(s"appium --session-override -p ${port}").run()
-    asyncTask(10){
+    asyncTask(10) {
       appiumProcess.exitValue()
     } match {
-      case None=>{log.info("appium start success")}
-      case Some(code)=>{log.error(s"appium failed with code ${code}")}
+      case None => {
+        log.info("appium start success")
+      }
+      case Some(code) => {
+        log.error(s"appium failed with code ${code}")
+      }
     }
 
   }
@@ -95,12 +98,12 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
     this
   }
 
-/*
-  override def tap(): this.type = {
-    click on (XPathQuery(tree(loc, index)("xpath").toString))
-    this
-  }
-*/
+  /*
+    override def tap(): this.type = {
+      click on (XPathQuery(tree(loc, index)("xpath").toString))
+      this
+    }
+  */
 
   override def event(keycode: Int): Unit = {
     //todo:
@@ -120,10 +123,10 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
   }
 
 
-  def appium(url: String = "http://127.0.0.1:4723/wd/hub", configMap: Map[String, Any]=Map[String, Any]()): Unit = {
-    driver=new MacacaClient()
+  def appium(url: String = "http://127.0.0.1:4723/wd/hub", configMap: Map[String, Any] = Map[String, Any]()): Unit = {
+    driver = new MacacaClient()
     val porps = new JSONObject()
-    configMap.foreach(m=>porps.put(m._1,  m._2))
+    configMap.foreach(m => porps.put(m._1, m._2))
     porps.put("package", configMap("appPackage"))
     porps.put("activity", configMap("appActivity"))
 
@@ -172,7 +175,7 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
   }
 
   override def getDeviceInfo(): Unit = {
-    val size=driver.getWindowSize
+    val size = driver.getWindowSize
     log.info(s"size=${size}")
     screenHeight = size.get("height").toString.toInt
     screenWidth = size.get("width").toString.toInt
@@ -189,13 +192,13 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
 
 
   override def screenshot(): File = {
-    val location="/tmp/1.png"
+    val location = "/tmp/1.png"
     driver.saveScreenshot(location)
     new File(location)
   }
 
   //todo: 重构到独立的trait中
-  override def mark(fileName: String, newImageName:String,  x: Int, y: Int, w: Int, h: Int): Unit = {
+  override def mark(fileName: String, newImageName: String, x: Int, y: Int, w: Int, h: Int): Unit = {
     val file = new java.io.File(fileName)
     log.info(s"platformName=${platformName}")
     log.info("getScreenshot")
@@ -213,7 +216,7 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
 
     log.info(s"write png ${fileName}")
     if (platformName.toLowerCase == "ios") {
-      val subImg=img.getSubimage(0, 0, screenWidth, screenHeight)
+      val subImg = img.getSubimage(0, 0, screenWidth, screenHeight)
       ImageIO.write(subImg, "png", new java.io.File(newImageName))
     } else {
       ImageIO.write(img, "png", new java.io.File(newImageName))
@@ -225,13 +228,13 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
     println(s"hello ${action} ${number}")
   }
 
-/*
-  def tap(x: Int = screenWidth / 2, y: Int = screenHeight / 2): Unit = {
-    log.info("tap")
-    driver.tap(1, x, y, 100)
-    //driver.findElementByXPath("//UIAWindow[@path='/0/2']").click()
-    //new TouchAction(driver).tap(x, y).perform()
-  }*/
+  /*
+    def tap(x: Int = screenWidth / 2, y: Int = screenHeight / 2): Unit = {
+      log.info("tap")
+      driver.tap(1, x, y, 100)
+      //driver.findElementByXPath("//UIAWindow[@path='/0/2']").click()
+      //new TouchAction(driver).tap(x, y).perform()
+    }*/
 
   override def tap(): this.type = {
     currentElement.click()
@@ -265,18 +268,18 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
         case Some(v) => {
           log.trace("get page source success")
           //todo: wda返回的不是标准的xml
-          val xmlStr=v match {
-            case json if json.trim.charAt(0)=='{' => {
+          val xmlStr = v match {
+            case json if json.trim.charAt(0) == '{' => {
               log.info("json format maybe from wda")
               DataObject.fromJson[Map[String, String]](v).getOrElse("value", "")
             }
-            case xml if xml.trim.charAt(0)=='<' =>{
+            case xml if xml.trim.charAt(0) == '<' => {
               log.info("xml format ")
               xml
             }
           }
           currentPageSource = XPathUtil.toPrettyXML(xmlStr)
-          currentPageDom=XPathUtil.toDocument(currentPageSource)
+          currentPageDom = XPathUtil.toDocument(currentPageSource)
           return currentPageSource
         }
         case None => {
@@ -333,16 +336,16 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
     */
     //todo: 用其他定位方式优化
     log.info(s"find by xpath= ${element.loc}")
-    retry{
-      val s=driver.elementsByXPath(element.loc)
-      0 until s.size() map(s.getIndex(_))
+    retry {
+      val s = driver.elementsByXPath(element.loc)
+      0 until s.size() map (s.getIndex(_))
     } match {
       case Some(v) => {
         val arr = v.toList.distinct
         arr.length match {
           case len if len == 1 => {
             log.info("find by xpath success")
-            currentElement=arr.head
+            currentElement = arr.head
             return true
           }
           case len if len > 1 => {
@@ -350,7 +353,7 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
             //有些公司可能存在重名id
             arr.foreach(log.info)
             log.warn("just use the first one")
-            currentElement=arr.head
+            currentElement = arr.head
             return true
           }
           case len if len == 0 => {
@@ -367,7 +370,7 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
 
 
   override def getAppName(): String = {
-    val xpath="(//*[@package!=''])[1]"
+    val xpath = "(//*[@package!=''])[1]"
     getListFromXPath(xpath).head.getOrElse("package", "").toString
   }
 
@@ -377,8 +380,8 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
     ""
   }
 
-  override def getRect(): Rectangle ={
-    val rect=currentElement.getRect.asInstanceOf[JSONObject]
+  override def getRect(): Rectangle = {
+    val rect = currentElement.getRect.asInstanceOf[JSONObject]
     new Rectangle(rect.getIntValue("x"), rect.getIntValue("y"), rect.getIntValue("height"), rect.getIntValue("width"))
   }
 
@@ -386,7 +389,6 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver{
   override def sendKeys(content: String): Unit = {
     currentElement.sendKeys(content)
   }
-
 
 
 }

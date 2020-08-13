@@ -1,13 +1,8 @@
 package com.testerhome.appcrawler
 
-import org.apache.commons.io.FileUtils
 import org.scalatest.tools.Runner
 
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
-import scala.io.{Source, Codec}
-import scala.reflect.io.File
-import collection.JavaConversions._
+import scala.io.Source
 
 /**
   * Created by seveniruby on 16/8/15.
@@ -30,19 +25,19 @@ trait Report extends CommonLog {
       SuiteToClass.genTestCaseClass(
         suite,
         "com.testerhome.appcrawler.TemplateTestCase",
-        Map("uri"->suite, "name"->suite),
+        Map("uri" -> suite, "name" -> suite),
         testcaseDir
       )
     })
   }
 
 
-  def runTestCase(namespace: String=""): Unit = {
+  def runTestCase(namespace: String = ""): Unit = {
     var cmdArgs = Array("-R", testcaseDir,
       "-oF", "-u", reportPath, "-h", reportPath)
 
-    if(namespace.nonEmpty){
-      cmdArgs++=Array("-s", namespace)
+    if (namespace.nonEmpty) {
+      cmdArgs ++= Array("-s", namespace)
     }
 
     /*
@@ -65,25 +60,25 @@ trait Report extends CommonLog {
     changeTitle()
   }
 
-  def changeTitle(title:String=Report.title): Unit ={
-    val originTitle="ScalaTest Results"
-    val indexFile=reportPath+"/index.html"
-    val newContent=Source.fromFile(indexFile).mkString.replace(originTitle, title)
+  def changeTitle(title: String = Report.title): Unit = {
+    val originTitle = "ScalaTest Results"
+    val indexFile = reportPath + "/index.html"
+    val newContent = Source.fromFile(indexFile).mkString.replace(originTitle, title)
     scala.reflect.io.File(indexFile).writeAll(newContent)
   }
 
 }
 
-object Report extends Report{
-  var showCancel=false
-  var title="AppCrawler"
-  var master=""
-  var candidate=""
-  var reportDir=""
-  var store=new URIElementStore
+object Report extends Report {
+  var showCancel = false
+  var title = "AppCrawler"
+  var master = ""
+  var candidate = ""
+  var reportDir = ""
+  var store = new URIElementStore
 
 
-  def loadResult(elementsFile: String): URIElementStore ={
-    DataObject.fromYaml[URIElementStore](Source.fromFile(elementsFile).mkString)
+  def loadResult(elementsFile: String): URIElementStore = {
+    DataObject.fromYaml[URIElementStore]((Source fromFile elementsFile).mkString)
   }
 }

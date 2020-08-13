@@ -44,7 +44,7 @@ case class TreeNode[T](
 
 
   def toXml(tree: TreeNode[T]): String = {
-    val s=new StringBuffer()
+    val s = new StringBuffer()
     val before = (tree: TreeNode[T]) => {
       s.append(s"""<node TEXT="${xml.Utility.escape(tree.value.toString)}">""")
       //todo: 增加图片地址链接   LINK="file:///Users/seveniruby/projects/LBSRefresh/Android_20160216105737/946_StockDetail-Back--.png"
@@ -71,17 +71,17 @@ case class TreeNode[T](
     after(tree)
   }
 
-  def generateFreeMind(list: ListBuffer[T], path:String=null): String = {
-    if(list.isEmpty){
+  def generateFreeMind(list: ListBuffer[T], path: String = null): String = {
+    if (list.isEmpty) {
       return ""
     }
-    val root=TreeNode(list.head)
-    var currentNode=root
-    list.slice(1, list.size).foreach(e=>{
-      currentNode=currentNode.appendNode(root, TreeNode(e))
+    val root = TreeNode(list.head)
+    var currentNode = root
+    list.slice(1, list.size).foreach(e => {
+      currentNode = currentNode.appendNode(root, TreeNode(e))
     })
-    val xml=toXml(root)
-    if(path!=null){
+    val xml = toXml(root)
+    if (path != null) {
       val file = new java.io.File(path)
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(xml)

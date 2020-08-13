@@ -1,6 +1,5 @@
 package com.testerhome.appcrawler
 
-import org.apache.commons.lang3.StringUtils
 import org.scalatest
 import org.scalatest._
 
@@ -18,8 +17,7 @@ class TemplateTestCase extends FunSuite with BeforeAndAfterAllConfigMap with Mat
 
   def addTestCase() {
     val sortedElements = Report.store.elementStore
-      .filter(x => x._2.element.url == uri)
-      .map(_._2).toList
+      .filter(x => x._2.element.url == uri).values.toList
       .sortBy(_.clickedIndex)
 
     log.info(sortedElements.size)
@@ -45,39 +43,62 @@ class TemplateTestCase extends FunSuite with BeforeAndAfterAllConfigMap with Mat
       test(s"clickedIndex=${ele.clickedIndex} action=${ele.action}\nxpath=${testcase}") {
         ele.action match {
           case ElementStatus.Clicked => {
-              markup(
-                s"""
-                   |
-               |<img src='${File(ele.reqImg).name}' width='80%' />
-                   |<br></br>
-                   |<p>after clicked</p>
-                   |<img src='${File(ele.resImg).name}' width='80%' />
+            markup(
+              s"""
+                 |
+                 |<img src='${File(ele.reqImg).name}' width='80%' />
+                 |<br></br>
+                 |<p>after clicked</p>
+                 |<img src='${File(ele.resImg).name}' width='80%' />
           """.stripMargin
-              )
+            )
 
-              /*
-              markup(
-                s"""
-                |
-                |<pre>
-                |<xmp>
-                |${ele.reqDom.replaceFirst("xml", "x_m_l")}
-                |</xmp>
-                |</pre>
-              """.stripMargin
-              )
-              */
-              val req = XPathUtil.toDocument(ele.reqDom)
-              val res = XPathUtil.toDocument(ele.resDom)
-              log.debug(ele.reqDom)
-              AppCrawler.crawler.conf.asserts.foreach(assert => {
-                val given = assert.getOrElse("given", List[String]()).asInstanceOf[List[String]]
-                log.info(given.map(g => XPathUtil.getListFromXPath(g, req).size))
-                if (given.forall(g => XPathUtil.getListFromXPath(g, req).size > 0) == true) {
-                  log.info(s"asserts match")
-                  val existAsserts = assert.getOrElse("then", List[String]()).asInstanceOf[List[String]]
+            /*
+            markup(
+              s"""
+              |
+              |<pre>
+              |<xmp>
+              |${ele.reqDom.replaceFirst("xml", "x_m_l")}
+              |</xmp>
+              |</pre>
+            """.stripMargin
+            )
+            */
+            val req = XPathUtil.toDocument(ele.reqDom)
+            val res = XPathUtil.toDocument(ele.resDom)
+            log.debug(ele.reqDom)
+            AppCrawler.crawler.conf.asserts.foreach(assert => {
+              val given = assert.getOrElse("given", List[String]()).asInstanceOf[List[String]]
+              log.info(given.map(g => XPathUtil.getListFromXPath(g, req).size))
+              if (given.forall(g => XPathUtil.getListFromXPath(g, req).nonEmpty)) {
+                log.info(s"asserts match")
+                val existAsserts = assert.getOrElse("then", List[String]()).asInstanceOf[List[String]]
+                val cp = new scalatest.Checkpoints.Checkpoint
+                existAsserts.foreach(existAssert => {
+                  log.debug(existAssert)
+                  cp {
+                    withClue(s"${existAssert} 不存在\n") {
+                      XPathUtil.getListFromXPath(existAssert, res).size should be > 0
+                    }
+                  }
+                })
+                cp.reportAll()
+              } else {
+                log.info("not match")
+              }
+            })
+
+            AppCrawler.crawler.conf.testcase.steps.foreach(step => {
+              if (XPathUtil.getListFromXPath(step.when.xpath, req)
+                .map(_.getOrElse("xpath", ""))
+                .headOption.contains(ele.element.loc)
+              ) {
+                log.info(s"match testcase ${ele.element.loc}")
+
+                if (step.then != null) {
                   val cp = new scalatest.Checkpoints.Checkpoint
-                  existAsserts.foreach(existAssert => {
+                  step.then.foreach(existAssert => {
                     log.debug(existAssert)
                     cp {
                       withClue(s"${existAssert} 不存在\n") {
@@ -86,34 +107,11 @@ class TemplateTestCase extends FunSuite with BeforeAndAfterAllConfigMap with Mat
                     }
                   })
                   cp.reportAll()
-                } else {
-                  log.info("not match")
                 }
-              })
-
-              AppCrawler.crawler.conf.testcase.steps.foreach(step => {
-                if (XPathUtil.getListFromXPath(step.when.xpath, req)
-                  .map(_.getOrElse("xpath", ""))
-                  .headOption == Some(ele.element.loc)
-                ) {
-                  log.info(s"match testcase ${ele.element.loc}")
-
-                  if(step.then!=null) {
-                    val cp = new scalatest.Checkpoints.Checkpoint
-                    step.then.foreach(existAssert => {
-                      log.debug(existAssert)
-                      cp {
-                        withClue(s"${existAssert} 不存在\n") {
-                          XPathUtil.getListFromXPath(existAssert, res).size should be > 0
-                        }
-                      }
-                    })
-                    cp.reportAll()
-                  }
-                } else {
-                  log.info("not match")
-                }
-              })
+              } else {
+                log.info("not match")
+              }
+            })
 
           }
           case ElementStatus.Ready => {

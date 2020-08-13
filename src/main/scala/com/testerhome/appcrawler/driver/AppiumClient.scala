@@ -3,17 +3,15 @@ package com.testerhome.appcrawler.driver
 import java.awt.{BasicStroke, Color}
 import java.io.File
 import java.net.URL
-import java.time.Duration
 
-import javax.imageio.ImageIO
-import com.testerhome.appcrawler.{AppCrawler, CommonLog, DataObject, URIElement}
-import com.testerhome.appcrawler._
-import io.appium.java_client.{AppiumDriver, TouchAction}
+import com.testerhome.appcrawler.{AppCrawler, CommonLog, DataObject, URIElement, _}
 import io.appium.java_client.android.AndroidDriver
 import io.appium.java_client.android.nativekey.{AndroidKey, KeyEvent}
 import io.appium.java_client.ios.IOSDriver
 import io.appium.java_client.touch.offset.ElementOption.element
 import io.appium.java_client.touch.offset.PointOption.point
+import io.appium.java_client.{AppiumDriver, TouchAction}
+import javax.imageio.ImageIO
 import org.apache.log4j.Level
 import org.openqa.selenium.{OutputType, Rectangle, TakesScreenshot, WebElement}
 import org.scalatest.selenium.WebBrowser
@@ -30,7 +28,7 @@ class AppiumClient extends CommonLog with WebBrowser with WebDriver {
   var conf: CrawlerConf = _
 
   implicit var driver: AppiumDriver[WebElement] = _
-  var appiumProcess: Process = null
+  var appiumProcess: Process = _
   var loc = ""
   var index = 0
   var currentElement: WebElement = _

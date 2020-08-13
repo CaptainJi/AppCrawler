@@ -1,6 +1,5 @@
 package com.testerhome.appcrawler
 
-import org.apache.commons.lang3.StringEscapeUtils
 import javassist.{ClassPool, CtConstructor}
 
 import scala.util.{Failure, Success, Try}
