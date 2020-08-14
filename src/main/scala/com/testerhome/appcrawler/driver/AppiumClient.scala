@@ -4,6 +4,7 @@ import java.awt.{BasicStroke, Color}
 import java.io.File
 import java.net.URL
 
+import com.google.common.collect.ImmutableMap
 import com.testerhome.appcrawler.{AppCrawler, CommonLog, DataObject, URIElement, _}
 import io.appium.java_client.android.AndroidDriver
 import io.appium.java_client.android.nativekey.{AndroidKey, KeyEvent}
@@ -25,7 +26,6 @@ import scala.util.{Failure, Success, Try}
   */
 class AppiumClient extends CommonLog with WebBrowser with WebDriver {
   Runtimes.init()
-  var conf: CrawlerConf = _
 
   implicit var driver: AppiumDriver[WebElement] = _
   var appiumProcess: Process = _
@@ -67,6 +67,15 @@ class AppiumClient extends CommonLog with WebBrowser with WebDriver {
       }
     }
 
+  }
+
+  override def swipe(direction: String): Unit = {
+    if(driver.getPlatformName.equalsIgnoreCase("ios")) {
+      log.info(s"start swipe $direction")
+      driver.executeScript("mobile: swipe", ImmutableMap.of("direction" , direction))
+    } else {
+      super.swipe(direction)
+    }
   }
 
   override def stop(): Unit = {
@@ -137,7 +146,7 @@ class AppiumClient extends CommonLog with WebBrowser with WebDriver {
   }
 
   def attribute(key: String): String = {
-    nodes().head.get(key).get.toString
+    nodes().head(key).toString
   }
 
   def apply(key: String): String = {

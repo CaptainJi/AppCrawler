@@ -442,10 +442,6 @@ class Crawler extends CommonLog {
   }
 
   def isValid(m: immutable.Map[String, Any]): Boolean = {
-    val visible = m.getOrElse("visible", "true")
-    val isEnabled = m.getOrElse("enabled", "true")
-    val isValid = m.getOrElse("valid", "true")
-    val isDisplayed = m.getOrElse("displayed", "true")
 
 
     m.getOrElse("visible", "true") == "true" &&
