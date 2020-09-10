@@ -240,8 +240,6 @@ class Crawler extends CommonLog {
     service.start()
   }
   def setupAppium(): Unit = {
-    setupAppiumService()
-
     //todo: 主要做遍历测试和异常测试. 所以暂不使用selendroid
     //todo: Appium模式太慢
 

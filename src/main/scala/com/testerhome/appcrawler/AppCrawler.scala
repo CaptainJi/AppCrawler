@@ -62,7 +62,6 @@ object AppCrawler extends CommonLog {
   def setGlobalEncoding(): Unit = {
     log.debug("set file.encoding to UTF-8")
     System.setProperty("file.encoding", "UTF-8");
-
     val charset = classOf[Charset].getDeclaredField("defaultCharset")
     charset.setAccessible(true)
     charset.set(null, null)
@@ -214,14 +213,6 @@ object AppCrawler extends CommonLog {
         log.info(s"Set Platform=${crawlerConf.currentDriver}")
 
         //合并capability, 命令行>特定平台的capability>通用capability
-        crawlerConf.currentDriver.toLowerCase match {
-          case "android" => {
-            crawlerConf.capability ++= crawlerConf.androidCapability
-          }
-          case "ios" => {
-            crawlerConf.capability ++= crawlerConf.iosCapability
-          }
-        }
         crawlerConf.capability ++= config.capability
 
         //设定app
