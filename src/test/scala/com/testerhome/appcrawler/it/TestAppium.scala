@@ -6,15 +6,18 @@ import com.sun.jdi.connect.spi.TransportService.Capabilities
 import com.testerhome.appcrawler.driver.AppiumClient
 import io.appium.java_client.android.AndroidDriver
 import io.appium.java_client.remote.{AndroidMobileCapabilityType, MobileCapabilityType}
+import org.junit.runner.RunWith
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.remote.DesiredCapabilities
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 import scala.io.Source
 
 /**
   * Created by seveniruby on 16/9/24.
   */
+@RunWith(classOf[JUnitRunner])
 class TestAppium extends FunSuite{
   val a=new AppiumClient()
   test("appium success"){

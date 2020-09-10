@@ -182,13 +182,14 @@ class MacacaDriver extends CommonLog with WebBrowser with WebDriver {
     log.info(s"screenWidth=${screenWidth} screenHeight=${screenHeight}")
   }
 
-  override def swipe(startX: Double = 0.9, endX: Double = 0.1, startY: Double = 0.9, endY: Double = 0.1): Option[_] = {
-    retry(driver.swipe(
-      (screenWidth * startX).toInt, (screenHeight * startY).toInt,
-      (screenWidth * endX).toInt, (screenHeight * endY).toInt, 1000
-    )
-    )
-  }
+//  override def swipe(startX: Double = 0.9, endX: Double = 0.1, startY: Double = 0.9, endY: Double = 0.1): Option[_] = {
+    //TODO replace swipe by touch
+//    retry(driver.swipe(
+//      (screenWidth * startX).toInt, (screenHeight * startY).toInt,
+//      (screenWidth * endX).toInt, (screenHeight * endY).toInt, 1000
+//    )
+//    )
+//  }
 
 
   override def screenshot(): File = {

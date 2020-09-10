@@ -1,9 +1,9 @@
 package com.testerhome.appcrawler
 
-import java.io
 import java.util.Date
 
 import com.testerhome.appcrawler.driver.{AppiumClient, MacacaDriver, WebDriver}
+import io.appium.java_client.service.local.{AppiumDriverLocalService, AppiumServiceBuilder}
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.log4j._
@@ -15,7 +15,6 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.{immutable, mutable}
 import scala.reflect.io.File
 import scala.util.{Failure, Success, Try}
-
 
 /**
   * Created by seveniruby on 15/11/28.
@@ -235,11 +234,13 @@ class Crawler extends CommonLog {
     log.info("run testcases")
     new AutomationSuite().execute("run steps", ConfigMap("crawler" -> this))
   }
-
+  def setupAppiumService(): Unit = {
+    val builder = new AppiumServiceBuilder
+    val service = AppiumDriverLocalService.buildService(builder)
+    service.start()
+  }
   def setupAppium(): Unit = {
-    //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
-    //PageFactory.initElements(new AppiumFieldDecorator(driver, 10, TimeUnit.SECONDS), this)
-    //implicitlyWait(Span(10, Seconds))
+    setupAppiumService()
 
     //todo: 主要做遍历测试和异常测试. 所以暂不使用selendroid
     //todo: Appium模式太慢
@@ -1051,8 +1052,8 @@ class Crawler extends CommonLog {
       }
     }
 
-    val newImageFile = new io.File(newImageName)
-    val originImageFile = new io.File(originImageName)
+    val newImageFile = FileUtils.getFile(newImageName)
+    val originImageFile = FileUtils.getFile(originImageName)
     if (!newImageFile.exists() && originImageFile.exists()) {
       log.info("use last clicked image replace mark")
       FileUtils.copyFile(originImageFile, newImageFile)

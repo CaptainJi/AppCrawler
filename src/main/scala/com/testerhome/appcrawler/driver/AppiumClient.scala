@@ -95,7 +95,7 @@ class AppiumClient extends CommonLog with WebBrowser with WebDriver {
   def wait(key: String): Unit = {
     var isFound = false
     1 to 10 foreach (i => {
-      if (isFound == false) {
+      if (!isFound) {
         val elements = driver.findElementsByXPath(key)
         if (elements.size() > 0) {
           isFound = true
