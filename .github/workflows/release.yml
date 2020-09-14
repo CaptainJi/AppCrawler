@@ -19,7 +19,7 @@ jobs:
         uses: battila7/get-version-action@v2
       - name: Build project # This would actually build your project, using zip for an example artifact
         env:
-          VERSION: ${{ steps.get_version.outputs.version-without-v }}
+          APP_VERSION: ${{ steps.get_version.outputs.version-without-v }}
         run: |
           ./gradlew shadowJar
           ls  build/libs

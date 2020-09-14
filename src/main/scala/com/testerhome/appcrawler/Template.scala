@@ -17,46 +17,43 @@ class Template {
   val elements = mutable.HashMap[String, ListBuffer[Map[String, Any]]]()
 
 
-  def getPageSource(url: String): Unit = {
-    val page = Source.fromURL(s"${url}/source/xml").mkString
-    val xml = DataObject.fromJson[Map[String, String]](page).getOrElse("value", "")
+  def getPageSource(url:String): Unit ={
+    val page=Source.fromURL(s"${url}/source/xml").mkString
+    val xml=TData.fromJson[Map[String, String]](page).getOrElse("value", "")
       .asInstanceOf[Map[String, String]].getOrElse("tree", "")
-    val doc = XPathUtil.toDocument(xml)
-    elements("Demo") = ListBuffer[Map[String, Any]]()
-    elements("Demo") ++= XPathUtil.getListFromXPath("//*[]", doc)
+    elements("Demo")=ListBuffer[Map[String, Any]]()
+    elements("Demo")++=XPathUtil.getNodeListFromXPath("//*[]", xml)
 
   }
-
-  def read(path: String): Unit = {
+  def read(path:String): Unit = {
 
     //val path = "/Users/seveniruby/projects/AppCrawlerSuite/AppCrawler/android_20170109145102/elements.yml"
-    val store = DataObject.fromYaml[URIElementStore](Source.fromFile(path).mkString).elementStore
+    val store = (TData.fromYaml[URIElementStore](Source.fromFile(path).mkString)).elementStore
 
     store.foreach(s => {
       val reqDom = s._2.reqDom
       val url = s._2.element.url
-      if (reqDom.length != 0) {
-        val doc = XPathUtil.toDocument(reqDom)
+      if (reqDom.size != 0) {
 
-        if (!elements.contains(url)) {
+        if (elements.contains(url) == false) {
           elements.put(url, ListBuffer[Map[String, Any]]())
         }
-        elements(url) ++= XPathUtil.getListFromXPath("//*", doc)
-        val tagsLimit = List("Image", "Button", "Text")
+        elements(url) ++= XPathUtil.getNodeListFromXPath("//*", reqDom)
+        val tagsLimit=List("Image", "Button", "Text")
         elements(url) = elements(url)
-          .filter(_.getOrElse("visible", "true") == "true")
-          .filter(_.getOrElse("tag", "").toString.contains("StatusBar") == false)
-          .filter(e => tagsLimit.exists(t => e.getOrElse("tag", "").toString.contains(t)))
+          .filter(_.getOrElse("visible", "true")=="true")
+          .filter(_.getOrElse("tag", "").toString.contains("StatusBar")==false)
+          .filter(e=>tagsLimit.exists(t=>e.getOrElse("tag", "").toString.contains(t)))
           .distinct
       }
 
     })
   }
 
-  def write(template: String, dir: String) {
+  def write(template:String, dir:String) {
     val engine = new TemplateEngine
     elements.foreach(e => {
-      val file: String = e._1
+      val file:String = e._1
       println(s"file=${file}")
       e._2.foreach(m => {
         val name = m("name")
@@ -72,12 +69,12 @@ class Template {
       )
       println(output)
 
-      val directory = new File(dir)
-      if (!directory.exists()) {
+      val directory=new File(dir)
+      if(directory.exists()==false){
         FileUtils.forceMkdir(directory)
       }
       println(s"template source directory = ${dir}")
-      val appdex = template.split('.').takeRight(2).head
+      val appdex=template.split('.').takeRight(2).head
       scala.reflect.io.File(s"${dir}/${file}.${appdex}").writeAll(output)
 
     })

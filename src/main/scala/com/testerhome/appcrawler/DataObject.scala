@@ -1,15 +1,20 @@
 package com.testerhome.appcrawler
 
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
+import com.fasterxml.jackson.databind.{DeserializationFeature, SerializationFeature, ObjectMapper}
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
+import scala.reflect.ClassTag
+import scala.reflect.ClassTag
+import scala.reflect._
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable
-import scala.reflect.{ClassTag, _}
 
 
 /**
@@ -47,8 +52,7 @@ trait DataObject {
   }
 
   def fromXML(str: String): Map[String, Any] = {
-    val node = Jsoup.parse(str)
-
+    val node=Jsoup.parse(str)
     def lift(node: Element): Map[String, Any] = node match {
       case doc: Document =>
         Map[String, Any](
@@ -72,7 +76,6 @@ trait DataObject {
 
       }
     }
-
     lift(node)
   }
 
@@ -80,7 +83,6 @@ trait DataObject {
   def flatten(data: Map[String, Any]): mutable.Map[String, Any] = {
     val stack = new mutable.Stack[String]()
     val result = mutable.Map[String, Any]()
-
     def loop(dataKV: scala.collection.Map[String, Any]): Unit = {
 
       dataKV.foreach(data => {
@@ -116,12 +118,9 @@ trait DataObject {
         stack.pop()
       })
     }
-
     loop(data)
     result
   }
 
 
 }
-
-object DataObject extends DataObject
