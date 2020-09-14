@@ -3,9 +3,11 @@ package com.testerhome.appcrawler
 import java.io.File
 import java.lang.reflect.Field
 import java.nio.charset.Charset
+import java.util.Properties
 
 import com.testerhome.appcrawler.plugin.FlowDiff
 import org.apache.log4j.Level
+import org.fusesource.scalate.support.TemplateConversions.anyToElvis
 import org.scalatest.ConfigMap
 
 import scala.io.Source
@@ -15,9 +17,9 @@ import scala.io.Source
   */
 object AppCrawler extends CommonLog {
   val banner=
-    """
+    s"""
       |----------------
-      |AppCrawler2 1.1.0 [base on AppCrawler 霍格沃兹测试学院特别纪念版 2.4.0]
+      |AppCrawler2 ${version} [base on AppCrawler 霍格沃兹测试学院特别纪念版 2.4.0]
       |Appium 1.18.1 Java8 tested
       |app爬虫, 用于自动遍历测试. 支持Android和iOS, 支持真机和模拟器
       |项目地址: https://github.com/trevorwang/AppCrawler
@@ -320,5 +322,9 @@ object AppCrawler extends CommonLog {
     crawler = new Crawler
     crawler.loadConf(conf)
     crawler.start()
+  }
+
+  def version(): String = {
+    getClass.getPackage.getImplementationVersion
   }
 }

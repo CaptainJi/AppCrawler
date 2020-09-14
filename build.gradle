@@ -24,6 +24,12 @@ repositories {
 
 mainClassName = "com.testerhome.appcrawler.AppCrawler"
 
+jar {
+    manifest {
+        attributes 'Implementation-Version': System.getenv("APP_VERSION") ?: "1.0"
+    }
+}
+
 tasks.withType(ScalaCompile) {
     scalaCompileOptions.forkOptions.with {
         memoryMaximumSize = '1g'
