@@ -19,28 +19,26 @@ class Template {
 
   def getPageSource(url:String): Unit ={
     val page=Source.fromURL(s"${url}/source/xml").mkString
-    val xml=DataObject.fromJson[Map[String, String]](page).getOrElse("value", "")
+    val xml=TData.fromJson[Map[String, String]](page).getOrElse("value", "")
       .asInstanceOf[Map[String, String]].getOrElse("tree", "")
-    val doc=XPathUtil.toDocument(xml)
     elements("Demo")=ListBuffer[Map[String, Any]]()
-    elements("Demo")++=XPathUtil.getListFromXPath("//*[]", doc)
+    elements("Demo")++=XPathUtil.getNodeListFromXPath("//*[]", xml)
 
   }
   def read(path:String): Unit = {
 
     //val path = "/Users/seveniruby/projects/AppCrawlerSuite/AppCrawler/android_20170109145102/elements.yml"
-    val store = (DataObject.fromYaml[URIElementStore](Source.fromFile(path).mkString)).elementStore
+    val store = (TData.fromYaml[URIElementStore](Source.fromFile(path).mkString)).elementStore
 
     store.foreach(s => {
       val reqDom = s._2.reqDom
       val url = s._2.element.url
       if (reqDom.size != 0) {
-        val doc = XPathUtil.toDocument(reqDom)
 
         if (elements.contains(url) == false) {
           elements.put(url, ListBuffer[Map[String, Any]]())
         }
-        elements(url) ++= XPathUtil.getListFromXPath("//*", doc)
+        elements(url) ++= XPathUtil.getNodeListFromXPath("//*", reqDom)
         val tagsLimit=List("Image", "Button", "Text")
         elements(url) = elements(url)
           .filter(_.getOrElse("visible", "true")=="true")

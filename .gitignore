@@ -6,3 +6,15 @@ conf.json
 xueqiu.json
 *.apk
 *.swp
+.DS_Store
+.java-version
+lib/tools.jar
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+node_modules
+output
+*.ipa

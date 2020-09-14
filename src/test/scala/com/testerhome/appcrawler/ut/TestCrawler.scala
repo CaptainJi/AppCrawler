@@ -261,13 +261,13 @@ class TestCrawler extends FunSuite with Matchers{
         |        </UIAWindow>
         |        <UIAWindow height="480" width="320" y="0" x="0" path="/0/2" hint="" visible="true" valid="true" enabled="true" dom="" value="" label="" name="">
         |            <UIAStatusBar height="20" width="320" y="0" x="0" path="/0/2/0" hint="" visible="true" valid="true" enabled="true" dom="" value="" label="" name="">
-        |                <UIAElement height="20" width="39" y="0" x="6" path="/0/2/0/0" hint="Swipe down with three fingers to reveal the notification center., Swipe up with three fingers to reveal the control center, Double-tap to scroll to top" visible="true" valid="true" enabled="true" dom="" value="" label="" name="Swipe down with three fingers to reveal the notification center., Swipe up with three fingers to reveal the control center, Double-tap to scroll to top">
+        |                <UIAElement height="20" width="39" y="0" x="6" path="/0/2/0/0" hint="AppiumTouchAction down with three fingers to reveal the notification center., AppiumTouchAction up with three fingers to reveal the control center, Double-tap to scroll to top" visible="true" valid="true" enabled="true" dom="" value="" label="" name="AppiumTouchAction down with three fingers to reveal the notification center., AppiumTouchAction up with three fingers to reveal the control center, Double-tap to scroll to top">
         |                </UIAElement>
-        |                <UIAElement height="20" width="13" y="0" x="50" path="/0/2/0/1" hint="Swipe down with three fingers to reveal the notification center., Swipe up with three fingers to reveal the control center, Double-tap to scroll to top" visible="true" valid="true" enabled="true" dom="" value="SSID" label="3 of 3 Wi-Fi bars" name="3 of 3 Wi-Fi bars">
+        |                <UIAElement height="20" width="13" y="0" x="50" path="/0/2/0/1" hint="AppiumTouchAction down with three fingers to reveal the notification center., AppiumTouchAction up with three fingers to reveal the control center, Double-tap to scroll to top" visible="true" valid="true" enabled="true" dom="" value="SSID" label="3 of 3 Wi-Fi bars" name="3 of 3 Wi-Fi bars">
         |                </UIAElement>
-        |                <UIAElement height="20" width="49" y="0" x="138" path="/0/2/0/2" hint="Swipe down with three fingers to reveal the notification center., Swipe up with three fingers to reveal the control center, Double-tap to scroll to top" visible="true" valid="true" enabled="true" dom="" value="" label="2:32 PM" name="2:32 PM">
+        |                <UIAElement height="20" width="49" y="0" x="138" path="/0/2/0/2" hint="AppiumTouchAction down with three fingers to reveal the notification center., AppiumTouchAction up with three fingers to reveal the control center, Double-tap to scroll to top" visible="true" valid="true" enabled="true" dom="" value="" label="2:32 PM" name="2:32 PM">
         |                </UIAElement>
-        |                <UIAElement height="20" width="25" y="0" x="290" path="/0/2/0/3" hint="Swipe down with three fingers to reveal the notification center., Swipe up with three fingers to reveal the control center, Double-tap to scroll to top" visible="true" valid="true" enabled="true" dom="" value="" label="-100% battery power" name="-100% battery power">
+        |                <UIAElement height="20" width="25" y="0" x="290" path="/0/2/0/3" hint="AppiumTouchAction down with three fingers to reveal the notification center., AppiumTouchAction up with three fingers to reveal the control center, Double-tap to scroll to top" visible="true" valid="true" enabled="true" dom="" value="" label="-100% battery power" name="-100% battery power">
         |                </UIAElement>
         |            </UIAStatusBar>
         |        </UIAWindow>
@@ -281,8 +281,8 @@ class TestCrawler extends FunSuite with Matchers{
     val appium=new Crawler
     appium.driver.currentPageSource=xml
     XPathUtil.toDocument(appium.driver.currentPageSource)
-    println(appium.driver.getListFromXPath("//UIAWindow[1]//*[@visible='true' and @name!='']"))
-    println(appium.driver.getListFromXPath("//UIAWindow[1]//*[@visible='true' and @value!='']"))
+    println(appium.driver.getNodeListByKey("//UIAWindow[1]//*[@visible='true' and @name!='']"))
+    println(appium.driver.getNodeListByKey("//UIAWindow[1]//*[@visible='true' and @value!='']"))
   }
 
   test("whilespace"){

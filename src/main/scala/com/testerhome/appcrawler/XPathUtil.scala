@@ -52,7 +52,7 @@ object XPathUtil extends CommonLog {
     * @return
     */
   def getXPathFromAttributes(attributes: ListBuffer[Map[String, String]]): String = {
-    var xpath = attributes.takeRight(4).map(attribute => {
+    var xpath = attributes.map(attribute => {
       var newAttribute = attribute
       //如果有值就不需要path了, 基本上两层xpath定位即可唯一
       xpathExpr.foreach(key => {
@@ -67,13 +67,10 @@ object XPathUtil extends CommonLog {
       if (newAttribute.getOrElse("name", "") == newAttribute.getOrElse("label", "")) {
         newAttribute = newAttribute - "name"
       }
+      //优先取content-desc
       if (newAttribute.getOrElse("content-desc", "") == newAttribute.getOrElse("resource-id", "")) {
-        newAttribute = newAttribute - "content-desc"
+        newAttribute = newAttribute - "resource-id"
       }
-      if(newAttribute.getOrElse("resource-id", "").nonEmpty){
-        newAttribute=Map("resource-id"-> newAttribute.getOrElse("resource-id", "") )
-      }
-
 
       var xpathSingle = newAttribute.map(kv => {
         //todo: appium的bug. 如果控件内有换行getSource会自动去掉换行. 但是xpath表达式里面没换行会找不到元素
@@ -84,49 +81,32 @@ object XPathUtil extends CommonLog {
           //case "index" => ""
           case "name" if kv._2.size>50 => ""
             //todo: 优化长文本的展示
-          case "text" if newAttribute("tag").contains("Button")==false && kv._2.length>10 => ""
+          case "text" if newAttribute("tag").contains("Button")==false && kv._2.length>10 => {
+            log.trace(kv)
+            log.trace(newAttribute)
+            ""
+          }
           case key if xpathExpr.contains(key) && kv._2.nonEmpty => s"@${kv._1}=" + "\"" + kv._2.replace("\"", "\\\"") + "\""
           case _ => ""
         }
-        /*
-        if (kv._1 != "tag") {
-          if (kv._1 == "name" && kv._2.size > 50) {
-            log.trace(s"name size too long ${kv._2.size}>20")
-            ""
-          }
-          //只有按钮才需要记录文本, 文本框很容易变化, 不需要记录
-          else if (kv._1 == "text" && kv._2.size > 10 && newAttribute("tag").contains("Button") ) {
-            log.trace(s"text size too long ${kv._2.size}>10")
-            s"contains(@text, '${kv._2.split("&")(0).take(10)}')"
-          }
-          else {
-            s"@${kv._1}=" + "\"" + kv._2.replace("\"", "\\\"") + "\""
-          }
-        } else {
-          ""
-        }
-        */
       }).filter(x => x.nonEmpty).mkString(" and ")
 
+      //todo: 改进xpath算法，更灵活，更唯一，更简短
       //todo: macaca的source有问题
       xpathSingle = if (xpathSingle.isEmpty) {
-        s"/${attribute.getOrElse("class", attribute.getOrElse("tag", "*"))}"
+        //s"/${attribute.getOrElse("class", attribute.getOrElse("tag", "*"))}"
+        ""
       } else {
-        s"/*[${xpathSingle}]"
+        s"//*[${xpathSingle}]"
       }
       xpathSingle
     }
     ).mkString("")
-    if (xpath.isEmpty) {
-      log.trace(attributes)
-    } else {
-      xpath = "/" + xpath
-    }
     return xpath
   }
 
   def getAttributesFromNode(node: Node): ListBuffer[Map[String, String]] ={
-    val path = ListBuffer[Map[String, String]]()
+    val attributesList = ListBuffer[Map[String, String]]()
     //递归获取路径,生成可定位的xpath表达式
     def getParent(node: Node): Unit = {
       if (node.hasAttributes) {
@@ -138,30 +118,71 @@ object XPathUtil extends CommonLog {
           attributeMap ++= Map(kv.getName -> kv.getValue)
         })
         attributeMap ++= Map("tag" -> node.getNodeName)
-        path += attributeMap
+        attributesList += attributeMap
       }
+
       if (node.getParentNode != null) {
         getParent(node.getParentNode)
       }
     }
     getParent(node)
     //返回一个从root到leaf的属性列表
-    return path.reverse
+    return attributesList.reverse
 
   }
 
 
-  def getListFromXPath(xpath: String, pageDom: Document): List[Map[String, Any]] = {
+  def getAncestorFromNode(node: Node): Unit ={
+
+
+  }
+  def isMenuFromBrotherNode(node: Node): Boolean ={
+    var b=false
+    val nodeList=node.getParentNode.getChildNodes
+    0 until(nodeList.getLength) foreach(i=>{
+      if(b==false) {
+        val attributes = nodeList.item(i).getAttributes
+        if(attributes!=null) {
+          0 until attributes.getLength foreach (i => {
+            val kv = attributes.item(i).asInstanceOf[Attr]
+            if (kv.getName == "selected" && kv.getValue() == "true") {
+              b = true
+            }
+          })
+        }
+      }
+    })
+    b
+  }
+
+
+  def getNodeListFromXML(raw:String, xpath:String): AnyRef ={
+    val pageDom=toDocument(raw)
+    getNodeListFromXML(pageDom, xpath)
+  }
+
+  def getNodeListFromXML(pageDom:Document, xpath:String): AnyRef ={
     val nodesMap = ListBuffer[Map[String, Any]]()
     val xPath: XPath = XPathFactory.newInstance().newXPath()
     val compexp = xPath.compile(xpath)
     //val node=compexp.evaluate(pageDom)
-    val node = if (xpath.matches("string(.*)") || xpath.matches(".*/@[^/]*")) {
+    if (xpath.matches("string(.*)") || xpath.matches(".*/@[^/]*")) {
       compexp.evaluate(pageDom, XPathConstants.STRING)
     } else {
       compexp.evaluate(pageDom, XPathConstants.NODESET)
     }
+  }
 
+
+  def getNodeListFromXPath(xpath:String, pageDomString: String): List[Map[String, Any]] ={
+    val pageDom=toDocument(pageDomString)
+    getNodeListFromXPath(xpath, pageDom)
+  }
+  def getNodeListFromXPath(xpath: String, pageDom: Document): List[Map[String, Any]] = {
+
+    val node=getNodeListFromXML(pageDom, xpath)
+
+    val nodeMapList = ListBuffer[Map[String, Any]]()
     node match {
       case nodeList: NodeList => {
         0 until nodeList.getLength foreach (i => {
@@ -170,12 +191,25 @@ object XPathUtil extends CommonLog {
           nodeMap("name") = ""
           nodeMap("value") = ""
           nodeMap("label") = ""
+          nodeMap("x")="0"
+          nodeMap("y")="0"
+          nodeMap("width")="0"
+          nodeMap("height")="0"
 
           val node = nodeList.item(i)
           //如果node为.可能会异常. 不过目前不会
           nodeMap("tag") = node.getNodeName
-          val path=getAttributesFromNode(node)
-          nodeMap("xpath") = getXPathFromAttributes(path)
+
+
+          val attributesList=getAttributesFromNode(node)
+          //必须在xpath前面
+          nodeMap("depth") = attributesList.size
+
+          //todo: 改进算法
+          //nodeMap("menu") = isMenuFromBrotherNode(node)
+          nodeMap("ancestor")=attributesList.map(_.get("tag").get).mkString("/")
+          nodeMap("xpath") = getXPathFromAttributes(attributesList)
+
           //支持导出单个字段
           nodeMap(node.getNodeName) = node.getNodeValue
           //获得所有节点属性
@@ -191,13 +225,7 @@ object XPathUtil extends CommonLog {
           //如果是android 转化为和iOS相同的结构
           //name=resource-id label=content-desc value=text
           if (nodeMap.contains("resource-id")) {
-            //todo: /结尾的会被解释为/之前的内容
-            val arr = nodeMap("resource-id").toString.split('/')
-            if (arr.length == 1) {
-              nodeMap("name") = ""
-            } else {
-              nodeMap("name") = nodeMap("resource-id").toString.split('/').last
-            }
+            nodeMap("name") = nodeMap("resource-id").toString
           }
           if (nodeMap.contains("text")) {
             nodeMap("value") = nodeMap("text")
@@ -205,20 +233,59 @@ object XPathUtil extends CommonLog {
           if (nodeMap.contains("content-desc")) {
             nodeMap("label") = nodeMap("content-desc")
           }
+          //为了加速android定位
+          if (nodeMap.contains("instance")) {
+            nodeMap("instance") = nodeMap("instance")
+          }
+          //默认true
+          nodeMap("valid")= nodeMap.getOrElse("visible", "true") == "true" &&
+            nodeMap.getOrElse("enabled", "true") == "true" &&
+            nodeMap.getOrElse("valid", "true") == "true"
+
+          //android
+          if(nodeMap.contains("bounds")){
+            val rect=nodeMap("bounds").toString.split("[^0-9]+").takeRight(4)
+            nodeMap("x")=rect(0).toInt
+            nodeMap("y")=rect(1).toInt
+            nodeMap("width")=rect(2).toInt-rect(0).toInt
+            nodeMap("height")=rect(3).toInt-rect(1).toInt
+          }
+
 
           if (nodeMap("xpath").toString.nonEmpty && nodeMap("value").toString().size<50) {
-            nodesMap += (nodeMap.toMap)
-          } else {
-            log.trace(s"xpath error skip ${nodeMap}")
+            nodeMapList += (nodeMap.toMap)
           }
         } )
       }
       case attr:String => {
         //如果是提取xpath的属性值, 就返回一个简单的结构
-        nodesMap+=Map("attribute"->attr)
+        nodeMapList+=Map("attribute"->attr)
       }
     }
-    nodesMap.toList
+    nodeMapList.toList
+  }
+
+  def getNodeListByKey(key:String, currentPageDom: Document): List[Map[String, Any]] ={
+    key match {
+      //xpath
+      case xpath if Array("/.*", "\\(.*", "string\\(/.*\\)").exists(xpath.matches(_)) => {
+        getNodeListFromXPath(xpath, currentPageDom)
+      }
+      case regex if regex.contains(".*") || regex.startsWith("^")  => {
+        getNodeListFromXPath("//*", currentPageDom).filter(m=>{
+          m("name").toString.matches(regex) ||
+            m("label").toString.matches(regex) ||
+            m("value").toString.matches(regex)
+        })
+      }
+      case str: String => {
+        getNodeListFromXPath("//*", currentPageDom).filter(m=>{
+          m("name").toString.contains(str) ||
+            m("label").toString.contains(str) ||
+            m("value").toString.contains(str)
+        })
+      }
+    }
   }
 
 }

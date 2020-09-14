@@ -1,23 +1,14 @@
 package com.testerhome.appcrawler.ut
 
 import java.io.File
-import java.io.File
-import java.util.jar.JarFile
 
-import com.testerhome.appcrawler.CommonLog
-import com.testerhome.appcrawler.plugin.DemoPlugin
-import com.testerhome.appcrawler._
+import com.testerhome.appcrawler.{CommonLog, _}
 import com.testerhome.appcrawler.driver.AppiumClient
+import com.testerhome.appcrawler.plugin.{DemoPlugin, Plugin}
 import org.scalatest.FunSuite
-import org.xml.sax.ErrorHandler
 
-import scala.reflect.internal.settings.MutableSettings
-import scala.reflect.internal.util.ScalaClassLoader
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
-import scala.reflect.io.AbstractFile
-import scala.tools.nsc.util.BatchSourceFile
-import scala.tools.nsc.{GenericRunnerSettings, Global, Settings}
-import scala.tools.nsc.interpreter.IMain
+import scala.tools.nsc.{Global, Settings}
 
 /**
   * Created by seveniruby on 16/8/10.
@@ -26,13 +17,13 @@ class TestRuntimes extends FunSuite with CommonLog{
 
   val fileName="/Users/seveniruby/projects/LBSRefresh/iOS_20160813203343/AppCrawler_8.scala"
   test("MiniAppium dsl"){
-    AppiumClient.dsl("hello(\"seveniruby\", 30000)")
-    AppiumClient.dsl("hello(\"ruby\", 30000)")
-    AppiumClient.dsl(" hello(\"seveniruby\", 30000)")
-    AppiumClient.dsl("hello(\"seveniruby\", 30000 )  ")
-    AppiumClient.dsl("sleep(3)")
-    AppiumClient.dsl("hello(\"xxxxx\")")
-    AppiumClient.dsl("println(com.testerhome.appcrawler.AppCrawler.crawler.driver)")
+//    AppiumClient.dsl("hello(\"seveniruby\", 30000)")
+//    AppiumClient.dsl("hello(\"ruby\", 30000)")
+//    AppiumClient.dsl(" hello(\"seveniruby\", 30000)")
+//    AppiumClient.dsl("hello(\"seveniruby\", 30000 )  ")
+//    AppiumClient.dsl("sleep(3)")
+//    AppiumClient.dsl("hello(\"xxxxx\")")
+//    AppiumClient.dsl("println(com.testerhome.appcrawler.AppCrawler.crawler.driver)")
 
   }
 

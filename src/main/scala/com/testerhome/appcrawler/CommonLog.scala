@@ -13,7 +13,7 @@ trait CommonLog {
   BasicConfigurator.configure()
   Logger.getRootLogger.setLevel(Level.INFO)
   @JsonIgnore
-  val layout=new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %p [%c{1}.%M.%L] %m%n")
+  val layout=new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %p [%c{1}.%L.%M] %m%n")
   @JsonIgnore
   lazy val log = initLog()
 
@@ -27,7 +27,7 @@ trait CommonLog {
       console.setLayout(layout)
       log.addAppender(console)
     }else{
-      log.info("alread exist")
+      log.info("already exist")
     }
     log.trace(s"set ${this} log level to ${GA.logLevel}")
     log.setLevel(GA.logLevel)

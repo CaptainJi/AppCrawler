@@ -27,6 +27,7 @@ class ReportPlugin extends Plugin with Report {
   }
 
   override def stop(): Unit ={
+    this.getCrawler().saveLog()
     generateReport()
   }
 
@@ -35,7 +36,7 @@ class ReportPlugin extends Plugin with Report {
     log.info(s"clickedElementsList size = ${count}")
     val curSize=getCrawler().store.clickedElementsList.size
     if(curSize-lastSize > curSize/10+20 ){
-      log.info(s"${curSize}-${lastSize} > ${curSize}/10+10  ")
+      log.info(s"${curSize}-${lastSize} > ${curSize}/10+20  ")
       log.info("generate test report ")
       generateReport()
     }

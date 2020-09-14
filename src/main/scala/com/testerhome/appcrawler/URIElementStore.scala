@@ -34,6 +34,12 @@ class URIElementStore {
     elementStore(element.toString).action=ElementStatus.Clicked
     elementStore(element.toString).clickedIndex=clickedElementsList.indexOf(element)
   }
+  def setElementClear(element: URIElement=clickedElementsList.last): Unit = {
+    if(elementStore.contains(element.toString)){
+      elementStore.remove(element.toString)
+    }
+  }
+
 
   def saveElement(element: URIElement): Unit = {
     if(elementStore.contains(element.toString)==false){
@@ -80,8 +86,6 @@ class URIElementStore {
     }
   }
 
-
-
   def saveReqImg(imgName:String): Unit = {
     val head = clickedElementsList.last.toString
     if (elementStore(head).reqImg.isEmpty) {
@@ -114,7 +118,7 @@ class URIElementStore {
     if (elementStore.contains(ele.toString)) {
       elementStore(ele.toString).action == ElementStatus.Clicked
     } else {
-      AppCrawler.log.trace(s"element=${ele.toLoc()} first show, need click")
+      AppCrawler.log.trace(s"element=${ele} first show, need click")
       false
     }
   }
@@ -123,7 +127,7 @@ class URIElementStore {
     if (elementStore.contains(ele.toString)) {
       elementStore(ele.toString).action == ElementStatus.Skipped
     } else {
-      AppCrawler.log.trace(s"element=${ele.toLoc()} first show, need click")
+      AppCrawler.log.trace(s"element=${ele} first show, need click")
       false
     }
   }
@@ -144,5 +148,5 @@ case class ElementInfo(
                         var resImg:String="",
                         var clickedIndex: Int = -1,
                         var action: ElementStatus.Value = ElementStatus.Ready,
-                        var element: URIElement = URIElement("Init", "", "", "", "")
+                        var element: URIElement = URIElement(url="Init", tag="", id="", name="", xpath="")
                       )

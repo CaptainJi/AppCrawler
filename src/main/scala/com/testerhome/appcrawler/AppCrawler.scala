@@ -3,9 +3,11 @@ package com.testerhome.appcrawler
 import java.io.File
 import java.lang.reflect.Field
 import java.nio.charset.Charset
+import java.util.Properties
 
 import com.testerhome.appcrawler.plugin.FlowDiff
 import org.apache.log4j.Level
+import org.fusesource.scalate.support.TemplateConversions.anyToElvis
 import org.scalatest.ConfigMap
 
 import scala.io.Source
@@ -15,15 +17,15 @@ import scala.io.Source
   */
 object AppCrawler extends CommonLog {
   val banner=
-    """
+    s"""
       |----------------
-      |AppCrawler 2.1.2 [霍格沃兹测试学院特别纪念版]
-      |Appium Version 1.7.1 support
+      |AppCrawler2 ${version} [base on AppCrawler 霍格沃兹测试学院特别纪念版 2.4.0]
+      |Appium 1.18.1 Java8 tested
       |app爬虫, 用于自动遍历测试. 支持Android和iOS, 支持真机和模拟器
-      |帮助文档: https://github.com/seveniruby/AppCrawler
+      |项目地址: https://github.com/trevorwang/AppCrawler
       |移动测试技术交流: https://testerhome.com
-      |感谢: 晓光 泉龙 杨榕 恒温 mikezhou yaming116 沐木
-      |感谢如下公司提供商业支持: Keep
+      |联络作者: trevor.wang@qq.com
+      |
       |--------------------------------
       |
     """.stripMargin
@@ -34,6 +36,7 @@ object AppCrawler extends CommonLog {
   val startTime = new java.text.SimpleDateFormat("YYYYMMddHHmmss").format(new java.util.Date().getTime)
   case class Param(
                     app: String = "",
+                    encoding: String="",
                     conf: File = new File(""),
                     verbose: Boolean = false,
                     mode: String = "",
@@ -63,22 +66,20 @@ object AppCrawler extends CommonLog {
   }
 
 
-  def setGlobalEncoding(): Unit = {
-    log.debug("set file.encoding to UTF-8")
-    System.setProperty("file.encoding", "UTF-8");
-
+  def setGlobalEncoding(encoding:String="UTF-8"): Unit = {
+    log.info("default Charset=" + Charset.defaultCharset())
+    log.info("default file.encoding=" + System.getProperty("file.encoding"))
+    log.info(s"set file.encoding to ${encoding}")
+    System.setProperty("file.encoding", encoding)
     val charset = classOf[Charset].getDeclaredField("defaultCharset")
     charset.setAccessible(true)
     charset.set(null, null)
-    log.debug("Default Charset=" + Charset.defaultCharset())
-    log.debug("file.encoding=" + System.getProperty("file.encoding"))
-    log.debug("Default Charset=" + Charset.defaultCharset())
-    log.debug("project directory=" + (new java.io.File(getClass.getProtectionDomain.getCodeSource.getLocation.getPath)).getParentFile.getParentFile)
-
+    log.info("Charset=" + Charset.defaultCharset())
+    log.info("file.encoding=" + System.getProperty("file.encoding"))
+    //log.info("project directory=" + (new java.io.File(getClass.getProtectionDomain.getCodeSource.getLocation.getPath)).getParentFile.getParentFile)
   }
 
   def main(args: Array[String]) {
-    setGlobalEncoding()
     // parser.parse returns Opti on[C]
     val args_new = if (args.length == 0) {
       Array("--help")
@@ -99,6 +100,12 @@ object AppCrawler extends CommonLog {
         c.copy(app = x)
       }
       } text ("Android或者iOS的文件地址, 可以是网络地址, 赋值给appium的app选项")
+
+      opt[String]('e', "encoding") action { (x, c) => {
+        c.copy(app = x)
+      }
+      } text ("set encoding, such as UTF-8 GBK")
+
       opt[File]('c', "conf") action { (x, c) =>
         c.copy(conf = x)
       } validate { x => {
@@ -159,19 +166,13 @@ object AppCrawler extends CommonLog {
           |appcrawler --demo
           |
           |#启动已经安装过的app
-          |appcrawler --capability appPackage=com.xueqiu.android,appActivity=.welcomeActivity
+          |appcrawler --capability "appPackage=com.xueqiu.android,appActivity=.view.WelcomeActivityAlias"
           |
           |#从已经结束的结果中重新生成报告
           |appcrawler --report result/
           |
           |#新老版本对比
           |appcrawler --candidate result/ --master pre/ --report ./
-          |
-          |#自动生成Page Object代码模板文件
-          |appcrawler --template PageObjectDemo.ssp --output result/
-          |
-          |#根据wda的inspector生成测试用例代码
-          |appcrawler --template PageObjectDemo.ssp -u http://localhost:8100
           |
         """.stripMargin)
     }
@@ -187,6 +188,10 @@ object AppCrawler extends CommonLog {
           log.info(s"set global log level to ${GA.logLevel}")
           XPathUtil.initLog()
         }
+
+        if(config.encoding.nonEmpty){
+          setGlobalEncoding(config.encoding)
+        }
         log.trace("config=")
         log.trace(config)
         if (config.sbt_params.nonEmpty) {
@@ -200,38 +205,13 @@ object AppCrawler extends CommonLog {
           crawlerConf = crawlerConf.load(config.conf).get
         }
 
-        //判断平台
-        config.app match {
-          case androidApp if androidApp.matches(".*\\.apk$") => {
-            crawlerConf.currentDriver = "Android"
-          }
-          case iosApp if iosApp.matches(".*\\.ipa$") || iosApp.matches(".*\\.app$") => {
-            crawlerConf.currentDriver = "iOS"
-          }
-          case ios if config.platform.toLowerCase == "ios" =>
-            crawlerConf.currentDriver = "iOS"
-          case android if config.platform.toLowerCase == "android" =>
-            crawlerConf.currentDriver = "Android"
-          case _ =>
-            log.warn("can not know what platform, will use default android, please use -p to set the platform")
-        }
-        log.info(s"Set Platform=${crawlerConf.currentDriver}")
-
         //合并capability, 命令行>特定平台的capability>通用capability
-        crawlerConf.currentDriver.toLowerCase match {
-          case "android" => {
-            crawlerConf.capability ++= crawlerConf.androidCapability
-          }
-          case "ios" => {
-            crawlerConf.capability ++= crawlerConf.iosCapability
-          }
-        }
         crawlerConf.capability ++= config.capability
 
         //设定app
-        crawlerConf.capability ++=Map("app"-> parsePath(config.app).getOrElse(""))
-        log.info(s"app path = ${crawlerConf.capability("app")}")
-
+        if(config.app.nonEmpty){
+          crawlerConf.capability ++=Map("app"-> parsePath(config.app).getOrElse(""))
+        }
         //设定appium的端口
 
         config.appium match {
@@ -258,7 +238,7 @@ object AppCrawler extends CommonLog {
           case param if param.nonEmpty => crawlerConf.resultDir = param
           case conf if crawlerConf.resultDir.nonEmpty => log.info("use conf in config file")
           case _ =>
-            crawlerConf.resultDir = s"${crawlerConf.currentDriver}_${startTime}"
+            crawlerConf.resultDir = s"${startTime}"
         }
         log.info(s"result directory = ${crawlerConf.resultDir}")
 
@@ -268,7 +248,7 @@ object AppCrawler extends CommonLog {
         }
 
         log.trace("yaml config")
-        log.trace(DataObject.toYaml(crawlerConf))
+        log.trace(TData.toYaml(crawlerConf))
 
         //todo: 用switch替代
         if (config.report != "" && config.candidate.isEmpty && config.template=="") {
@@ -302,9 +282,10 @@ object AppCrawler extends CommonLog {
 
         //生成demo示例文件
         if(config.demo){
-          val file=scala.reflect.io.File("example.yml")
+          val file=scala.reflect.io.File("demo.yml")
+          crawlerConf.resultDir=""
           file.writeAll(crawlerConf.toYaml())
-          log.info(s"you can read ${file.jfile.getCanonicalPath} for demo example")
+          log.info(s"you can read ${file.jfile.getCanonicalPath} for demo")
           return
         }
 
@@ -341,5 +322,9 @@ object AppCrawler extends CommonLog {
     crawler = new Crawler
     crawler.loadConf(conf)
     crawler.start()
+  }
+
+  def version(): String = {
+    getClass.getPackage.getImplementationVersion
   }
 }

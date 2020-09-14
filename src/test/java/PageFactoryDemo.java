@@ -15,13 +15,13 @@ public class PageFactoryDemo {
     public static void main(){
         PageObjectDemo pageObject=new PageObjectDemo();
         RemoteWebDriver driver=new RemoteWebDriver(null);
-        PageFactory.initElements(new AppiumFieldDecorator(driver,
+//        PageFactory.initElements(new AppiumFieldDecorator(driver,
               /*searchContext is a WebDriver or WebElement
               instance */
-                        new TimeOutDuration(15, //default implicit waiting timeout for all strategies
-                                TimeUnit.SECONDS)),
-                pageObject //an instance of PageObject.class
-        );
+//                        new TimeOutDuration(15, //default implicit waiting timeout for all strategies
+//                                TimeUnit.SECONDS)),
+//                pageObject //an instance of PageObject.class
+//        );
 
     }
 }

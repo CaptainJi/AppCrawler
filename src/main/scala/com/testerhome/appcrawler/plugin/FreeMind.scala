@@ -1,6 +1,6 @@
 package com.testerhome.appcrawler.plugin
 
-import com.testerhome.appcrawler.{TreeNode, Plugin}
+import com.testerhome.appcrawler.TreeNode
 
 import scala.collection.mutable.ListBuffer
 import scala.reflect.io.File
@@ -21,7 +21,7 @@ class FreeMind extends Plugin{
   def report(): Unit ={
     getCrawler().store.clickedElementsList.foreach(element=>{
       elementTreeList.append(element.url)
-      elementTreeList.append(element.loc)
+      elementTreeList.append(element.xpath)
     })
 
     File(s"${getCrawler().conf.resultDir}/freemind.mm").writeAll(

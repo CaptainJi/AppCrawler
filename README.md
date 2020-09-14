@@ -1,4 +1,38 @@
-# AppCrawler
+# AppCrawler2 
+
+> 改名为 appcrawler2 以示区分
+> 增加了 `demo.yml` 方便快速开始
+
+## 从源代码编译
+
+#### 给 sbt 设置国内源
+   ***大坑***
+   ***大坑***
+   ***大坑***
+    
+   > 代码中调用了 `com.sun.jdi`，需要复制 `tools.jar` 到 lib 目录
+
+#### 新建文件 `~/.sbt/repositories` 并添加一下内容
+
+   ```
+    [repositories]
+    local
+    huaweicloud-maven: https://repo.huaweicloud.com/repository/maven
+    maven-central: https://repo1.maven.org/maven2/
+    #maven-central-ivy: https://repo1.maven.org/maven2, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+    sbt-plugin-repo: https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+   ```
+
+#### 运行命令 
+
+   ```
+    sbt -Dsbt.override.build.repos=true -v assembly
+   ```
+
+#### `target` 目录下寻找生成的 jar 包
+
+
+
 
 一个基于自动遍历的app爬虫工具. 支持android和iOS, 支持真机和模拟器. 最大的特点是灵活性. 可通过配置来设定遍历的规则.
 
@@ -18,6 +52,7 @@
 * 支持自动截获接口请求(完成)
 * 支持新老版本的界面对比(Doing)
 * 云端兼容性测试服务利用, 支持Testin MQC MTC(Doing)
+
 
 ## 安装依赖
 
