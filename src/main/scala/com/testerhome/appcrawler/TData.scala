@@ -1,9 +1,11 @@
 package com.testerhome.appcrawler
 
-
 import java.io.{File, StringWriter}
 import java.nio.charset.{Charset, StandardCharsets}
+import java.util
 import java.util.Base64
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.{XPathConstants, XPathFactory}
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
@@ -11,11 +13,16 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.github.tototoshi.csv.CSVReader
 import com.jayway.jsonpath.{Configuration, JsonPath}
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.xpath.{XPathConstants, XPathFactory}
+import com.sun.org.apache.xml.internal.dtm.ref.DTMNodeList
 import net.lightbody.bmp.core.har.Har
 import net.minidev.json.JSONArray
 import org.apache.commons.io.IOUtils
+
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
+import scala.reflect.ClassTag
+import scala.reflect.ClassTag
+import scala.reflect._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
@@ -23,19 +30,18 @@ import org.w3c.dom.NodeList
 import us.codecraft.xsoup.Xsoup
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import scala.collection.mutable
 import scala.io.Source
-import scala.reflect.{ClassTag, _}
+import collection.JavaConverters._
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule
 
 /**
   * Created by seveniruby on 16/8/13.
   */
 object TData {
 
-  private val factory = DocumentBuilderFactory.newInstance
-  private val builder = factory.newDocumentBuilder()
-  private val xpathObject = XPathFactory.newInstance().newXPath()
+  private val factory=DocumentBuilderFactory.newInstance
+  private val builder=factory.newDocumentBuilder()
+  private val xpathObject=XPathFactory.newInstance().newXPath()
 
   private val defaultJsonConfig = Configuration.defaultConfiguration()
   defaultJsonConfig.addOptions(com.jayway.jsonpath.Option.DEFAULT_PATH_LEAF_TO_NULL)
@@ -70,18 +76,18 @@ object TData {
     mapper.registerModule(DefaultScalaModule)
     mapper.readValue(str, classTag[T].runtimeClass.asInstanceOf[Class[T]])
   }
-
-  def pretty(jsonString: String): String = {
+  def pretty(jsonString: String): String ={
     val mapper = new ObjectMapper()
     mapper.registerModule(DefaultScalaModule)
     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
 
-    val jsonObject = mapper.readValue(jsonString, classOf[java.lang.Object])
+    val jsonObject=mapper.readValue(jsonString, classOf[java.lang.Object])
     mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject)
   }
 
-  def toXML(data: Any, root: String = "xml"): String = {
+  def toXML(data: Any, root:String="xml"): String = {
     val mapper = new XmlMapper()
+    mapper.registerModule(new JaxbAnnotationModule)
     mapper.registerModule(com.fasterxml.jackson.module.scala.DefaultScalaModule)
     //mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
     //mapper.registerModule(DefaultScalaModule)
@@ -127,6 +133,7 @@ object TData {
 
 
   //扁平化
+  //todo: 去掉类型检查警告
   def flatten(data: Map[String, Any]): mutable.Map[String, Any] = {
     val stack = new mutable.Stack[String]()
     val result = mutable.Map[String, Any]()
@@ -175,13 +182,13 @@ object TData {
     result
   }
 
-  def toSchema(content: String): mutable.Map[String, String] = {
-    val map = flatten(from(content))
-    val mapNew = mutable.Map[String, String]()
-    map.map { case (k, v) => {
+  def toSchema(content:String): mutable.Map[String, String]={
+    val map=flatten(from(content))
+    val mapNew=mutable.Map[String, String]()
+    map.map{case (k, v)=>{
       v match {
-        case null => mapNew(k) = "null"
-        case _ => mapNew(k) = v.getClass.getSimpleName
+        case null => mapNew(k)="null"
+        case _ => mapNew(k)=v.getClass.getSimpleName
       }
 
     }
@@ -207,52 +214,31 @@ object TData {
   }
 
 
-  //两个nested的结构合并
-  def deepMerge[K](map: Map[K, _], that: Map[K, _]): Map[K, _] = {
-    (for (k <- map.keys ++ that.keys) yield {
-      val newValue =
-        (map.get(k), that.get(k)) match {
-          case (Some(v), None) => v
-          case (None, Some(v)) => v
-          case (Some(v1), Some(v2)) => {
-            (v1, v2) match {
-              case (v1: Map[K, _], v2: Map[K, _]) => deepMerge(v1, v2)
-              case (v1: List[_], v2: List[_]) => v1 ++ v2
-              case (v1: Array[_], v2: Array[_]) => v1 ++ v2
-              case (v1, null) => v1
-              case _ => v2
-            }
-          }
-        }
-      k -> newValue
-    }).toMap
-  }
-
   //从文本中给出结构化的解析结果
-  def from(content: String): Map[String, Any] = {
+  def from(content:String): Map[String, Any] ={
     content.trim.take(10) match {
-      case json if json.contains("{") => {
+      case json if json.contains("{") =>{
         fromJson[Map[String, Any]](content)
       }
       case html if html.toLowerCase.contains("<html>") => {
         fromHTML(content)
       }
-      case xml if xml.contains("<") => {
-        val root = builder.parse(IOUtils.toInputStream(content)).getDocumentElement.getTagName
-        val elements = fromXML[Map[String, Any]](content)
-        Map(root -> elements)
+      case xml if xml.contains("<") =>{
+        val root=builder.parse(IOUtils.toInputStream(content)).getDocumentElement.getTagName
+        val elements=fromXML[Map[String,Any]](content)
+        Map(root->elements)
       }
       case _ => {
-        Map("raw" -> content)
+        Map("raw"->content)
       }
     }
   }
 
   //todo: 支持单个值获取
   //给出jsonpath的结果
-  def jsonPath(raw: String, path: String): Any = {
-    val res = JsonPath.using(defaultJsonConfig).parse(raw).read[Any](path)
-    res match {
+  def jsonPath(raw:String, path:String): Any ={
+    val res=JsonPath.using(defaultJsonConfig).parse(raw).read[Any](path)
+    res match{
       case array: JSONArray => {
         array.toList
       }
@@ -264,35 +250,33 @@ object TData {
   }
 
   //解析xpath并给出结果
-  private def xpath2(raw: String, path: String): Any = {
-    val doc = Jsoup.parse(raw)
+  private def xpath2(raw:String, path:String): Any ={
+    val doc=Jsoup.parse(raw)
     Xsoup.compile(path).evaluate(doc).get
   }
 
-  private def xpathList(raw: String, path: String, encoding: String = "UTF-8"): Any = {
-    val doc = builder.parse(IOUtils.toInputStream(raw, encoding))
-    val array = xpathObject.compile(path).evaluate(doc, XPathConstants.NODESET).asInstanceOf[NodeList]
-    0.until(array.getLength).map(i => {
-      val children = array.item(i).getChildNodes
-      0.until(children.getLength).map(j => children.item(j).getNodeValue)
+  private def xpathList(raw:String, path:String, encoding:String="UTF-8"): Any = {
+    val doc=builder.parse(IOUtils.toInputStream(raw, encoding))
+    val array=xpathObject.compile(path).evaluate(doc, XPathConstants.NODESET).asInstanceOf[NodeList]
+    0.until(array.getLength).map(i=>{
+      val children=array.item(i).getChildNodes
+      0.until(children.getLength).map(j=>children.item(j).getNodeValue)
     }).flatten.toList
   }
-
-  def xpathSingle(raw: String, path: String, encoding: String = "UTF-8"): Any = {
-    val doc = builder.parse(IOUtils.toInputStream(raw, encoding))
+  private def xpathSingle(raw:String, path:String, encoding:String="UTF-8"): Any ={
+    val doc=builder.parse(IOUtils.toInputStream(raw, encoding))
     xpathObject.compile(path).evaluate(doc, XPathConstants.STRING)
   }
-
-  def xpath(raw: String, path: String): Any = {
+  def xpath(raw:String, path:String):Any={
     path match {
-      case single if List("[", "(").exists(c => single.contains(c)) => xpathSingle(raw, path)
-      case list if List("//").exists(c => list.contains(c)) => xpathList(raw, path)
+      case single if List("[", "(").exists(c=>single.contains(c)) => xpathSingle(raw, path)
+      case list if List("//").exists(c=>list.contains(c)) => xpathList(raw, path)
       case _ => xpathSingle(raw, path)
     }
   }
 
   //用于windows上坑爹的编码问题
-  def setEncoding(): Unit = {
+  def setEncoding(): Unit ={
     System.setProperty("file.encoding", "UTF-8");
     val charset = classOf[Charset].getDeclaredField("defaultCharset")
     charset.setAccessible(true)
@@ -300,8 +284,8 @@ object TData {
   }
 
 
-  def har2string(har: Har): String = {
-    val writer = new StringWriter()
+  def har2string(har:Har): String ={
+    val writer=new StringWriter()
     har.writeTo(writer)
     writer.toString
   }
@@ -316,50 +300,48 @@ object TData {
     return str
   }
 
-  def fromCSV(file: String): Array[java.util.Map[String, String]] = {
+  def fromCSV(file:String): Array[java.util.Map[String, String]] ={
     CSVReader.open(new File(getClass.getResource(file).getPath)).allWithHeaders().map(_.asJava).toArray
   }
-
-  def dataDriver(templateFile: String, dataFile: String, key: String = "template"): Array[java.util.Map[String, String]] = {
-    val path = if (templateFile.head == '/') {
-      templateFile.takeRight(templateFile.size - 1)
-    } else {
+  def dataDriver(templateFile:String, dataFile:String, key:String="template"): Array[java.util.Map[String, String]] ={
+    val path=if(templateFile.head=='/'){
+      templateFile.takeRight(templateFile.size-1)
+    }else{
       templateFile
     }
-    val content = Source.fromResource(path).mkString
-    val csv = CSVReader.open(new File(getClass.getResource(dataFile).getPath)).allWithHeaders()
-    csv.map(m => {
-      var contentNew = content
-      m.keys.foreach(key => {
-        contentNew = contentNew.replace(s"$${${key}}", m(key))
+    val content=Source.fromResource(path).mkString
+    val csv=CSVReader.open(new File(getClass.getResource(dataFile).getPath)).allWithHeaders()
+    csv.map(m=>{
+      var contentNew=content
+      m.keys.foreach(key=>{
+        contentNew=contentNew.replace(s"$${${key}}", m(key))
       })
-      (m ++ Map(key -> contentNew)).asJava
+      (m++Map(key->contentNew)).asJava
     }).toArray
   }
-
-  def dataDriver(templateFile: String, dataFile: String): Array[java.util.Map[String, String]] = {
+  def dataDriver(templateFile:String, dataFile:String): Array[java.util.Map[String, String]] ={
     dataDriver(templateFile, dataFile, "template")
   }
 
   //todo: 递归解析
-  def toHashMap(someObject: Any): Any = {
+  def toHashMap(someObject: Any): Any ={
     someObject match {
-      case kv: Map[String, _] => {
-        val h = new java.util.HashMap[String, Any]()
-        kv.foreach {
-          case (k, v) => {
-            h.put(k, toHashMap(v))
+      case kv: Map[_, _] => {
+        val h=new java.util.HashMap[String, Any]()
+        kv.foreach{
+          case (k,v)=> {
+            h.put(k.toString, toHashMap(v))
           }
         }
         h
       }
-      case list: List[_] => {
-        list.map(item => {
+      case list: List[_]=> {
+        list.map(item=>{
           toHashMap(item)
         }).toArray
       }
-      case array: Array[_] => {
-        array.map(item => {
+      case array: Array[_]=> {
+        array.map(item=>{
           toHashMap(item)
         })
       }

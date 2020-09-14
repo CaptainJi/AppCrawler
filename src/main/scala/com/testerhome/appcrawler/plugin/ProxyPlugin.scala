@@ -2,10 +2,13 @@ package com.testerhome.appcrawler.plugin
 
 import java.io.File
 
-import com.testerhome.appcrawler.{Plugin, URIElement}
+import com.brsanthu.googleanalytics.GoogleAnalytics
+import com.testerhome.appcrawler.URIElement
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.proxy.CaptureType
 import org.apache.log4j.{BasicConfigurator, Level, Logger}
+
+import scala.util.Try
 
 /**
   * Created by seveniruby on 16/4/26.
@@ -52,7 +55,7 @@ class ProxyPlugin extends Plugin {
         proxy.getHar.writeTo(file)
       }
     } catch {
-      case e: Exception => {
+      case e: Exception =>{
         log.error("read har error")
         log.error(e.getCause)
         log.error(e.getMessage)
@@ -62,7 +65,7 @@ class ProxyPlugin extends Plugin {
 
   }
 
-  override def stop(): Unit = {
+  override def stop(): Unit ={
     log.info("prpxy stop")
     proxy.stop()
   }

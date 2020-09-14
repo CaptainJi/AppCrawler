@@ -7,6 +7,7 @@ import com.testerhome.appcrawler._
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import scala.reflect.io.File
 
@@ -16,24 +17,14 @@ import scala.reflect.io.File
 class TestDataObject extends FunSuite with CommonLog with Matchers{
   test("save to yaml file"){
     val a="中国"
-    val yaml=DataObject.toYaml(a)
-    val aa=DataObject.fromYaml[String](yaml)
+    val yaml=TData.toYaml(a)
+    val aa=TData.fromYaml[String](yaml)
     log.info(aa)
-  }
-
-  test("conf yaml "){
-    val conf=new CrawlerConf()
-    conf.backButton.append("//北京")
-    val yaml=DataObject.toYaml(conf)
-    log.info(yaml)
-
-    val confNew=DataObject.fromYaml[CrawlerConf](yaml)
-    assert(confNew.backButton.last=="//北京")
   }
 
   test("read clickedElementsList"){
     val yaml=scala.io.Source.fromFile("iOS_20160813165030/clickedList.yml").getLines().mkString("\n")
-    val elementList=DataObject.fromYaml[List[URIElement]](yaml)
+    val elementList=TData.fromYaml[List[URIElement]](yaml)
     log.info(elementList.head)
     log.info(elementList.last)
 
@@ -42,7 +33,7 @@ class TestDataObject extends FunSuite with CommonLog with Matchers{
   test("json to yaml"){
     val conf=new CrawlerConf().load("src/test/scala/com/xueqiu/qa/appcrawler/it/xueqiu_private.yml")
     log.info(conf)
-    val yaml=DataObject.toYaml(conf)
+    val yaml=TData.toYaml(conf)
     File("src/test/scala/com/xueqiu/qa/appcrawler/it/xueqiu_private.yml").writeAll(yaml)
 
 
@@ -52,12 +43,12 @@ class TestDataObject extends FunSuite with CommonLog with Matchers{
     val file="src/universal/conf/xueqiu.json"
     val conf=new CrawlerConf().load(file)
     log.info(conf)
-    val yaml=DataObject.toYaml(conf)
+    val yaml=TData.toYaml(conf)
     File("src/universal/conf/xueqiu.yml").writeAll(yaml)
   }
 
   test("read json"){
-    val conf=DataObject.fromJson[CrawlerConf](Source.fromFile("src/test/scala/com/xueqiu/qa/appcrawler/it/xueqiu_private.yml").getLines().mkString("\n"))
+    val conf=TData.fromJson[CrawlerConf](Source.fromFile("src/test/scala/com/xueqiu/qa/appcrawler/it/xueqiu_private.yml").getLines().mkString("\n"))
     log.info(conf.saveScreen)
   }
   test("map yaml"){
@@ -68,13 +59,13 @@ class TestDataObject extends FunSuite with CommonLog with Matchers{
     val u2=Map(url2->2)
     u1 should be equals(u2)
 
-    val d1=DataObject.toYaml(u1)
+    val d1=TData.toYaml(u1)
     log.info(d1)
 
-    val d2=DataObject.fromYaml[Map[String,Map[String, String]]](d1)
+    val d2=TData.fromYaml[Map[String,Map[String, String]]](d1)
     val u22=URIElement(d2.get("2").get("url"), d2.get("2").get("tag"),
       d2.get("2").get("id"), d2.get("2").get("name"), d2.get("2").get("loc"))
-    assert(u22.loc==u1(2).loc)
+    assert(u22.xpath==u1(2).xpath)
 
   }
 
@@ -254,8 +245,8 @@ class TestDataObject extends FunSuite with CommonLog with Matchers{
         |
         |
       """.stripMargin
-    val m=DataObject.fromXML(xml)
-    val fm=DataObject.flatten(m)
+    val m=TData.fromXML(xml)
+    val fm=TData.flatten(m)
 
     println(m)
     println(fm)
@@ -292,8 +283,8 @@ class TestDataObject extends FunSuite with CommonLog with Matchers{
         |
       """.stripMargin
 
-    val m=DataObject.fromXML(xml)
-    val fm=DataObject.flatten(m)
+    val m=TData.fromXML(xml)
+    val fm=TData.flatten(m)
 
     println(m)
     println(fm)
@@ -308,6 +299,28 @@ class TestDataObject extends FunSuite with CommonLog with Matchers{
         |
         |{"status":0,"value":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<AppiumAUT>\n    <XCUIElementTypeApplication name=\"雪球\" label=\"雪球\" value=\"\" dom=\"\" enabled=\"true\" valid=\"true\" visible=\"true\" hint=\"\" path=\"/0\" x=\"0\" y=\"0\" width=\"375\" height=\"667\">\n</XCUIElementTypeApplication>\n</AppiumAUT>","sessionId":"6a137283-8ceb-4df4-8a48-bf9d5de32659"}
       """.stripMargin
-    log.info(DataObject.fromJson[Map[String, String]](str).getOrElse("value", ""))
+    log.info(TData.fromJson[Map[String, String]](str).getOrElse("value", ""))
+  }
+
+  test("load from yaml"){
+    val conf=new CrawlerConf()
+    conf.selectedList=ListBuffer[Step]()
+    File("/tmp/1.yaml").writeAll(TData.toYaml(conf))
+
+    val conf2=TData.fromYaml[CrawlerConf](Source.fromFile("/tmp/1.yaml").mkString)
+    log.info(conf2.selectedList)
+
+    conf.selectedList=null
+    File("/tmp/2.yaml").writeAll(TData.toYaml(conf))
+
+    val conf3=TData.fromYaml[CrawlerConf](Source.fromFile("/tmp/2.yaml").mkString)
+    log.info(conf3.selectedList)
+
+    val conf4=TData.fromYaml[CrawlerConf](Source.fromFile("/tmp/3.yaml").mkString)
+    log.info(conf4.selectedList)
+
+
+
+
   }
 }
