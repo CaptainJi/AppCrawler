@@ -17,13 +17,12 @@ object AppCrawler extends CommonLog {
   val banner=
     """
       |----------------
-      |AppCrawler 2.4.0 [霍格沃兹测试学院特别纪念版]
-      |Appium 1.8.1 Java8 tested
+      |AppCrawler2 1.1.0 [base on AppCrawler 霍格沃兹测试学院特别纪念版 2.4.0]
+      |Appium 1.18.1 Java8 tested
       |app爬虫, 用于自动遍历测试. 支持Android和iOS, 支持真机和模拟器
-      |项目地址: https://github.com/seveniruby/AppCrawler
+      |项目地址: https://github.com/trevorwang/AppCrawler
       |移动测试技术交流: https://testerhome.com
-      |联络作者: seveniruby@testerhome.com (思寒)
-      |致谢: 晓光 泉龙 杨榕 恒温 mikezhou yaming116 沐木
+      |联络作者: trevor.wang@qq.com
       |
       |--------------------------------
       |
