@@ -1,38 +1,15 @@
 # AppCrawler2 
 
 > 改名为 appcrawler2 以示区分
-> 增加了 `demo.yml` 方便快速开始
+> 合并原来版本 2.4 的代码
 
 ## 从源代码编译
 
-#### 给 sbt 设置国内源
-   ***大坑***
-   ***大坑***
-   ***大坑***
-    
-   > 代码中调用了 `com.sun.jdi`，需要复制 `tools.jar` 到 lib 目录
-
-#### 新建文件 `~/.sbt/repositories` 并添加一下内容
-
-   ```
-    [repositories]
-    local
-    huaweicloud-maven: https://repo.huaweicloud.com/repository/maven
-    maven-central: https://repo1.maven.org/maven2/
-    #maven-central-ivy: https://repo1.maven.org/maven2, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
-    sbt-plugin-repo: https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
-   ```
-
-#### 运行命令 
-
-   ```
-    sbt -Dsbt.override.build.repos=true -v assembly
-   ```
-
-#### `target` 目录下寻找生成的 jar 包
-
-
-
+### 使用 gradle 编译
+ ```
+   ./gradlew shadowJar
+ ```
+会在 `build/libs` 目录下生成 `appcrawler2-all.jar` 文件 
 
 一个基于自动遍历的app爬虫工具. 支持android和iOS, 支持真机和模拟器. 最大的特点是灵活性. 可通过配置来设定遍历的规则.
 
